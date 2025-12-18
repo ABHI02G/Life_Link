@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Center | LifeLink</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Global styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+
+  <style>
+    /* ------------ PAGE-SPECIFIC STYLES (AI Center) ------------ */
+
+    .ai-grid {
+      display: grid;
+      gap: 1.6rem;
+    }
+
+    @media (min-width: 960px) {
+      .ai-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .ai-big {
+        grid-column: span 2;
+      }
+    }
+
+    .ai-card {
+      height: 100%;
+      padding: 2rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .ai-card h3 {
+      margin-bottom: 0.6rem;
+    }
+
+    .ai-card p {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .AI-card button {
+      width: 100%;
+    }
+
+    main {
+      padding-bottom: 1rem;
+    }
+
+    /* ------------ MODERN POPUP MODALS ------------ */
+
+    .ai-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: rgba(0, 0, 15, 0.45);
+      backdrop-filter: blur(14px);
+      z-index: 999;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .ai-modal.is-open {
+      display: flex;
+    }
+
+    .ai-modal-dialog {
+      width: 100%;
+      max-width: 720px;
+      border-radius: 22px;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 18px 35px rgba(0, 0, 40, 0.28);
+      animation: slideUp 0.35s cubic-bezier(.2, .85, .25, 1);
+    }
+
+    .ai-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+
+    .ai-modal-header h3 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .ai-modal-header h3::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: inline-block;
+    }
+
+    .ai-modal-close {
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      background: rgba(255, 255, 255, 0.25);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.4rem;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .ai-modal-close:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .ai-modal-content p {
+      font-size: 0.95rem;
+      color: #444;
+      margin-bottom: 1.1rem;
+    }
+
+    .ai-form-grid {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    @media (min-width: 640px) {
+      .ai-form-grid.two-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .ai-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .ai-form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .ai-form-group input,
+    .ai-form-group select,
+    .ai-form-group textarea {
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      border: 1px solid rgba(120, 120, 120, 0.25);
+      font-size: 0.93rem;
+      background: rgba(255, 255, 255, 0.95);
+      outline: none;
+    }
+
+    .ai-form-group textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .ai-form-group input:focus,
+    .ai-form-group select:focus,
+    .ai-form-group textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-soft);
+    }
+
+    .ai-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.8rem;
+      margin-top: 1.4rem;
+      flex-wrap: wrap;
+    }
+
+    .ai-note {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+
+    /* Lists inside modals */
+    .ai-list {
+      margin-top: 0.8rem;
+      border-radius: 14px;
+      border: 1px solid rgba(180, 180, 200, 0.35);
+      padding: 0.6rem 0.85rem;
+      max-height: 220px;
+      overflow: auto;
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .ai-list-item {
+      padding: 0.4rem 0.1rem;
+      font-size: 0.82rem;
+      border-bottom: 1px dashed rgba(200, 200, 220, 0.6);
+    }
+
+    .ai-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .ai-list-item strong {
+      color: var(--primary-dark);
+    }
+
+    /* Badges & result cards */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.2rem 0.7rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-low {
+      background: rgba(0, 200, 83, 0.08);
+      color: #0f7a3b;
+      border: 1px solid rgba(0, 200, 83, 0.35);
+    }
+
+    .badge-medium {
+      background: rgba(255, 193, 7, 0.12);
+      color: #8a5a00;
+      border: 1px solid rgba(255, 193, 7, 0.4);
+    }
+
+    .badge-high {
+      background: rgba(244, 67, 54, 0.12);
+      color: #b01911;
+      border: 1px solid rgba(244, 67, 54, 0.5);
+    }
+
+    .symptom-result,
+    .score-result {
+      margin-top: 0.8rem;
+      border-radius: 14px;
+      padding: 0.8rem 0.9rem;
+      border: 1px solid rgba(180, 180, 200, 0.35);
+      background: rgba(255, 255, 255, 0.85);
+      font-size: 0.85rem;
+    }
+
+    .symptom-result h4,
+    .score-result h4 {
+      margin: 0 0 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .symptom-result ul {
+      padding-left: 1.1rem;
+      margin: 0.2rem 0 0.4rem;
+    }
+
+    .symptom-result li {
+      margin-bottom: 0.15rem;
+    }
+
+    /* Health score bar */
+    .score-bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(230, 230, 240, 0.9);
+      overflow: hidden;
+      margin: 0.4rem 0 0.2rem;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      transition: width 0.4s ease-out;
+    }
+
+    .score-bar-fill.good {
+      background: linear-gradient(90deg, #00c853, #64dd17);
+    }
+
+    .score-bar-fill.ok {
+      background: linear-gradient(90deg, #ffb300, #ff9800);
+    }
+
+    .score-bar-fill.bad {
+      background: linear-gradient(90deg, #ff7043, #e53935);
+    }
+
+    /* Animations */
+    @keyframes slideUp {
+      from {
+        transform: translateY(18px);
+        opacity: 0;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Background animation -->
+  <div class="background-pulse">
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+  </div>
+
+  <!-- Sidebar overlay -->
+  <div class="sidebar-backdrop"></div>
+
+  <div class="layout page-root">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass">
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">LIFELINK</div>
+      </div>
+
+      <nav class="sidebar-links">
+         <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('blood') }}">Blood Database</a>
+
+        <!-- FIXED ORGAN LINK -->
+        <a href="{{ url_for('organ_database') }}">Organ Database</a>
+
+        <a href="{{ url_for('ai') }}" class="active">AI System</a>
+        <a href="{{ url_for('rare_medicine') }}">Rare Medicine &amp; Anti-venom</a>
+        <a href="{{ url_for('appointment') }}">Appointment</a>
+        <a href="{{ url_for('profile') }}">Profile</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        AI Health Assistant Connected
+      </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="layout-main">
+      <!-- NAVBAR -->
+      <header class="navbar glass">
+        <div class="navbar-left">
+          <div class="logo-dot"></div>
+          <span class="logo-text">LIFELINK</span>
+        </div>
+
+     <nav class="navbar-links">
+          <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('blood') }}">Blood</a>
+
+          <!-- FIXED ORGAN LINK -->
+          <a href="{{ url_for('organ_database') }}">Organs</a>
+
+          <a href="{{ url_for('ai') }}" class="active">AI</a>
+          <a href="{{ url_for('rare_medicine') }}">Rare Medicine</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('appointment') }}">Appointment</a>
+        </nav>
+
+        <!-- MENU button -->
+        <button type="button" class="sidebar-toggle" aria-label="Toggle sidebar">
+          <span class="bar"></span>
+          <span class="label"></span>
+        </button>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main>
+        <section class="section">
+          <div class="section-header">
+            <h2>AI Health Assistant</h2>
+            <p>
+              Your AI co-pilot for reminders, monitoring, symptom analysis and doctor matching –
+              all in one place.
+            </p>
+          </div>
+
+          <div class="ai-grid">
+            <!-- 1. Reminders -->
+            <div class="glass info-card tilt-card ai-card">
+              <h3>Smart Reminders</h3>
+              <p>
+                Schedule medicine alerts, follow-up visits and lab reports.
+                AI keeps track so you don’t have to.
+              </p>
+              <button
+                class="btn primary"
+                type="button"
+                data-modal-target="reminderModal"
+              >
+                Manage Reminders
+              </button>
+            </div>
+
+            <!-- 2. Regular checks & sugar -->
+            <div class="glass info-card tilt-card ai-card">
+              <h3>Vitals & Sugar Monitor</h3>
+              <p>
+                Enter daily blood sugar, blood pressure and pulse.
+                AI highlights risky trends.
+              </p>
+              <button
+                class="btn primary"
+                type="button"
+                data-modal-target="vitalsModal"
+              >
+                Log Vitals
+              </button>
+            </div>
+
+            <!-- 3. Prescribe for users -->
+            <div class="glass info-card tilt-card ai-card">
+              <h3>AI Prescription Support</h3>
+              <p>
+                Describe your minor issues and ongoing medicines.
+                AI suggests questions to ask your doctor.
+              </p>
+              <button
+                class="btn primary"
+                type="button"
+                data-modal-target="prescriptionModal"
+              >
+                Open Prescription Assistant
+              </button>
+            </div>
+
+            <!-- 4. Symptom analyzer -->
+            <div class="glass info-card tilt-card ai-card ai-big">
+              <h3>Symptoms Analyzer</h3>
+              <p>
+                Use camera (future) or text input. AI groups your symptoms,
+                checks severity and suggests next steps.
+              </p>
+              <button
+                class="btn primary"
+                type="button"
+                data-modal-target="symptomModal"
+              >
+                Open Analyzer
+              </button>
+            </div>
+
+            <!-- 5. Match doctors -->
+            <div class="glass info-card tilt-card ai-card">
+              <h3>Doctor Match</h3>
+              <p>
+                AI matches symptoms with specialties and finds nearby doctors
+                or hospitals 
+              </p>
+              <button
+                class="btn primary"
+                type="button"
+                data-modal-target="doctorModal"
+              >
+                Find Doctor
+              </button>
+            </div>
+
+            <!-- 6. Health score -->
+            <div class="glass info-card tilt-card ai-card">
+              <h3>Health Score</h3>
+              <p>
+                Quick score using age, BMI, habits and activity to get an
+                approximate risk level.
+              </p>
+              <button
+                class="btn primary"
+                type="button"
+                data-modal-target="healthScoreModal"
+              >
+                Calculate Score
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          © 2025 LifeLink · AI Center
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- Emergency Button -->
+  <button id="emergencyBtn" class="emergency-btn">
+    <span class="emergency-dot"></span>
+    Emergency
+  </button>
+
+  <!-- Emergency Toast -->
+  <div id="emergencyToast" class="emergency-toast">
+    <div class="glass toast-content">
+      <h3>Emergency Mode Activated</h3>
+      <p>
+        Configure this to alert your emergency contacts and nearest hospitals.
+      </p>
+      <button id="closeToast" class="btn ghost">Close</button>
+    </div>
+  </div>
+
+  <!-- ----------------- MODALS ----------------- -->
+
+  <!-- Reminders Modal -->
+  <div class="ai-modal" id="reminderModal">
+    <div class="glass ai-modal-dialog">
+      <div class="ai-modal-header">
+        <h3>Smart Reminders</h3>
+        <button type="button" class="ai-modal-close" data-close>&times;</button>
+      </div>
+      <div class="ai-modal-content">
+        <p>
+          Save reminders for medicines, water intake, appointments or anything
+          related to your health routine. These are stored in your browser
+          (local only).
+        </p>
+        <div class="ai-form-grid two-col">
+          <div class="ai-form-group">
+            <label for="reminderTitle">Reminder title</label>
+            <input id="reminderTitle" type="text" placeholder="e.g. Morning BP tablet" />
+          </div>
+          <div class="ai-form-group">
+            <label for="reminderType">Type</label>
+            <select id="reminderType">
+              <option>Medicine</option>
+              <option>Appointment</option>
+              <option>Lab test</option>
+              <option>Water / Hydration</option>
+              <option>Custom</option>
+            </select>
+          </div>
+          <div class="ai-form-group">
+            <label for="reminderTime">Time</label>
+            <input id="reminderTime" type="time" />
+          </div>
+          <div class="ai-form-group">
+            <label for="reminderFreq">Frequency</label>
+            <select id="reminderFreq">
+              <option>Once</option>
+              <option>Daily</option>
+              <option>Weekly</option>
+              <option>Monthly</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ai-modal-footer" style="justify-content: space-between;">
+          <div class="ai-note">
+            Stored using <strong>localStorage</strong>. Clearing browser data will remove them.
+          </div>
+          <div>
+            <button type="button" class="btn ghost" data-close>Close</button>
+            <button type="button" class="btn primary" id="saveReminderBtn">Save reminder</button>
+          </div>
+        </div>
+
+        <div class="ai-list" id="reminderList">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vitals Modal -->
+  <div class="ai-modal" id="vitalsModal">
+    <div class="glass ai-modal-dialog">
+      <div class="ai-modal-header">
+        <h3>Vitals & Blood Sugar</h3>
+        <button type="button" class="ai-modal-close" data-close>&times;</button>
+      </div>
+      <div class="ai-modal-content">
+        <p>
+          Enter your latest readings. AI (future) can build trends and warn if
+          values move outside safe ranges. Logs are stored locally in your browser.
+        </p>
+        <div class="ai-form-grid two-col">
+          <div class="ai-form-group">
+            <label for="glucoseLevel">Blood sugar (mg/dL)</label>
+            <input id="glucoseLevel" type="number" placeholder="e.g. 110" />
+          </div>
+          <div class="ai-form-group">
+            <label for="readingType">Reading type</label>
+            <select id="readingType">
+              <option>Fasting</option>
+              <option>Post-meal (PP)</option>
+              <option>Random</option>
+            </select>
+          </div>
+          <div class="ai-form-group">
+            <label for="bpReading">Blood pressure (mmHg)</label>
+            <input id="bpReading" type="text" placeholder="e.g. 120/80" />
+          </div>
+          <div class="ai-form-group">
+            <label for="pulseRate">Pulse (bpm)</label>
+            <input id="pulseRate" type="number" placeholder="e.g. 76" />
+          </div>
+        </div>
+        <div class="ai-form-group" style="margin-top:0.6rem;">
+          <label for="vitalNotes">Notes</label>
+          <textarea id="vitalNotes" placeholder="e.g. Took reading after breakfast, feeling slightly dizzy"></textarea>
+        </div>
+
+        <div class="ai-modal-footer" style="justify-content: space-between;">
+          <div class="ai-note">
+            Stored as <strong>vital logs</strong> in localStorage. Future: graphs and alerts.
+          </div>
+          <div>
+            <button type="button" class="btn ghost" data-close>Close</button>
+            <button type="button" class="btn primary" id="saveVitalsBtn">Save log</button>
+          </div>
+        </div>
+
+        <div class="ai-list" id="vitalsList">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prescription Modal -->
+  <div class="ai-modal" id="prescriptionModal">
+    <div class="glass ai-modal-dialog">
+      <div class="ai-modal-header">
+        <h3>AI Prescription Support</h3>
+        <button type="button" class="ai-modal-close" data-close>&times;</button>
+      </div>
+      <div class="ai-modal-content">
+        <p>
+          This is <strong>not</strong> a replacement for a doctor. AI helps you
+          organize your symptoms and medicine list before consultation.
+        </p>
+        <div class="ai-form-group">
+          <label for="currentMeds">Current medicines(optional)</label>
+          <textarea
+            id="currentMeds"
+            placeholder="e.g. Metformin 500mg (morning), Amlodipine 5mg (night)"
+          ></textarea>
+        </div>
+        <div class="ai-form-group">
+          <label for="issueDesc">What do you want help with?</label>
+          <textarea
+            id="issueDesc"
+            placeholder="e.g. Mild headache since 2 days, feeling tired, sugar slightly high..."
+          ></textarea>
+        </div>
+        <div class="ai-note">
+          Future: AI can auto-generate a summary to show your doctor + suggest
+          what questions you should ask.
+        </div>
+      </div>
+      <div class="ai-modal-footer">
+        <button type="button" class="btn ghost" data-close>Close</button>
+        <button type="button" class="btn primary" id="generatePrescriptionBtn">Generate summary</button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Symptom Analyzer Modal -->
+  <div class="ai-modal" id="symptomModal">
+    <div class="glass ai-modal-dialog">
+      <div class="ai-modal-header">
+        <h3>Symptoms Analyzer</h3>
+        <button type="button" class="ai-modal-close" data-close>&times;</button>
+      </div>
+      <div class="ai-modal-content">
+        <p>
+          Describe your symptoms in simple language. This tool is only a
+          <strong>prototype</strong> and <strong>not medical advice</strong>. Always consult a doctor
+          for real diagnosis or treatment.
+        </p>
+
+        <div class="ai-form-grid">
+          <div class="ai-form-group">
+            <label for="symptomMode">Input mode</label>
+            <select id="symptomMode">
+              <option>Text input</option>
+              <option disabled>Camera (coming soon)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ai-form-group" style="margin-top:0.6rem;">
+          <label for="symptomText">Describe your symptoms</label>
+          <textarea
+            id="symptomText"
+            placeholder="e.g. Dry cough, mild fever since 3 days, body pain, difficulty sleeping..."
+          ></textarea>
+        </div>
+
+        <div class="ai-modal-footer" style="justify-content: space-between;">
+          <div class="ai-note">
+            Prototype analyzer: uses simple keyword rules to guess categories & risk.
+          </div>
+          <div>
+            <button type="button" class="btn ghost" data-close>Close</button>
+            <button type="button" class="btn primary" id="analyzeSymptomsBtn">Analyze symptoms</button>
+          </div>
+        </div>
+
+        <div id="symptomResult" class="symptom-result" style="display:none;">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Doctor Match Modal -->
+  <div class="ai-modal" id="doctorModal">
+    <div class="glass ai-modal-dialog">
+      <div class="ai-modal-header">
+        <h3>Doctor Match</h3>
+        <button type="button" class="ai-modal-close" data-close>&times;</button>
+      </div>
+      <div class="ai-modal-content">
+        <p>
+          AI links your main complaint with the right specialty and consult type.
+          
+        </p>
+        <div class="ai-form-grid two-col">
+          <div class="ai-form-group">
+            <label for="matchSymptom">Main symptom / condition</label>
+            <input id="matchSymptom" type="text" placeholder="e.g. Chest pain, diabetes, migraine" />
+          </div>
+          <div class="ai-form-group">
+            <label for="matchPriority">Urgency</label>
+            <select id="matchPriority">
+              <option>Routine</option>
+              <option>Within 24 hours</option>
+              <option>Urgent</option>
+            </select>
+          </div>
+          <div class="ai-form-group">
+            <label for="matchCity">City / area</label>
+            <input id="matchCity" type="text" placeholder="e.g. Bengaluru, Jayanagar" />
+          </div>
+          <div class="ai-form-group">
+            <label for="matchMode">Consultation type</label>
+            <select id="matchMode">
+              <option>In-person</option>
+              <option>Online / video</option>
+              <option>Either</option>
+            </select>
+          </div>
+        </div>
+        <div class="ai-modal-footer" style="justify-content: space-between;">
+          <div class="ai-note">
+            Output below is only sample logic – real app would call a doctor search API + maps.
+          </div>
+          <div>
+            <button type="button" class="btn ghost" data-close>Close</button>
+            <button type="button" class="btn primary" id="findDoctorBtn">Find matches</button>
+          </div>
+        </div>
+
+        <div class="ai-list" id="doctorMatchResult">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Health Score Modal -->
+  <div class="ai-modal" id="healthScoreModal">
+    <div class="glass ai-modal-dialog">
+      <div class="ai-modal-header">
+        <h3>Health Score</h3>
+        <button type="button" class="ai-modal-close" data-close>&times;</button>
+      </div>
+      <div class="ai-modal-content">
+        <p>
+          Quick estimation based on age, BMI and lifestyle. This is only a
+          <strong>calculation</strong>, not real risk prediction.
+        </p>
+
+        <div class="ai-form-grid two-col">
+          <div class="ai-form-group">
+            <label for="hsAge">Age (years)</label>
+            <input id="hsAge" type="number" placeholder="e.g. 32" />
+          </div>
+          <div class="ai-form-group">
+            <label for="hsGender">Gender</label>
+            <select id="hsGender">
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other / Prefer not</option>
+            </select>
+          </div>
+          <div class="ai-form-group">
+            <label for="hsHeight">Height (cm)</label>
+            <input id="hsHeight" type="number" placeholder="e.g. 170" />
+          </div>
+          <div class="ai-form-group">
+            <label for="hsWeight">Weight (kg)</label>
+            <input id="hsWeight" type="number" placeholder="e.g. 65" />
+          </div>
+          <div class="ai-form-group">
+            <label for="hsActivity">Activity level</label>
+            <select id="hsActivity">
+              <option>Low (desk job, no exercise)</option>
+              <option>Moderate (walks / light exercise)</option>
+              <option>High (regular workouts)</option>
+            </select>
+          </div>
+          <div class="ai-form-group">
+            <label for="hsHabits">Habits</label>
+            <select id="hsHabits">
+              <option>Non-smoker, no alcohol</option>
+              <option>Occasional alcohol</option>
+              <option>Smoker</option>
+              <option>Smoker + alcohol</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ai-modal-footer" style="justify-content: space-between;">
+          <div class="ai-note">
+            Prototype score only; talk to a doctor for real risk assessment.
+          </div>
+          <div>
+            <button type="button" class="btn ghost" data-close>Close</button>
+            <button type="button" class="btn primary" id="estimateScoreBtn">Estimate score</button>
+          </div>
+        </div>
+
+        <div id="healthScoreResult" class="score-result" style="display:none;">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global behaviour (sidebar, emergency, etc.) -->
+  <script src="{{ url_for('static', filename='global.js') }}"></script>
+
+  <!-- Modal + LocalStorage + Symptom Analyzer + Doctor Match + Health Score JS -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  /* ------------------------------------------------------
+     MODALS — OPEN / CLOSE
+  ------------------------------------------------------- */
+  const openButtons = document.querySelectorAll("[data-modal-target]");
+  const closeButtons = document.querySelectorAll("[data-close]");
+  const modals = document.querySelectorAll(".ai-modal");
+
+  function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.add("is-open");
+  }
+
+  function closeModal(modal) {
+    modal.classList.remove("is-open");
+  }
+
+  openButtons.forEach((btn) => {
+    btn.addEventListener("click", () => openModal(btn.dataset.modalTarget));
+  });
+
+  closeButtons.forEach((btn) => {
+    btn.addEventListener("click", () => closeModal(btn.closest(".ai-modal")));
+  });
+
+  modals.forEach((modal) => {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal(modal);
+    });
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") modals.forEach(m => m.classList.remove("is-open"));
+  });
+
+  /* ------------------------------------------------------
+     LOCAL STORAGE HELPERS
+  ------------------------------------------------------- */
+  function loadArray(key) {
+    try {
+      return JSON.parse(localStorage.getItem(key)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveArray(key, arr) {
+    localStorage.setItem(key, JSON.stringify(arr));
+  }
+
+  const REMINDER_KEY = "lifelink_reminders_v1";
+  const VITALS_KEY = "lifelink_vitals_v1";
+
+  let reminders = loadArray(REMINDER_KEY);
+  let vitalsLogs = loadArray(VITALS_KEY);
+
+  /* ------------------------------------------------------
+     REMINDERS
+  ------------------------------------------------------- */
+  const reminderList = document.getElementById("reminderList");
+  const saveReminderBtn = document.getElementById("saveReminderBtn");
+
+  function renderReminders() {
+    if (!reminders.length) {
+      reminderList.innerHTML = '<div class="ai-note">No reminders saved yet.</div>';
+      return;
+    }
+    reminderList.innerHTML = reminders
+      .map(r => `
+        <div class="ai-list-item">
+          <strong>${r.title}</strong> · ${r.type} · ${r.time} · ${r.freq}
+          <br><small>${new Date(r.createdAt).toLocaleString()}</small>
+        </div>
+      `)
+      .join("");
+  }
+
+  if (saveReminderBtn) {
+    saveReminderBtn.addEventListener("click", () => {
+      reminders.unshift({
+        title: reminderTitle.value || "Untitled",
+        type: reminderType.value,
+        time: reminderTime.value || "--:--",
+        freq: reminderFreq.value,
+        createdAt: new Date().toISOString(),
+      });
+      saveArray(REMINDER_KEY, reminders);
+      renderReminders();
+      reminderTitle.value = "";
+    });
+  }
+
+  /* ------------------------------------------------------
+     VITALS
+  ------------------------------------------------------- */
+  const saveVitalsBtn = document.getElementById("saveVitalsBtn");
+  const vitalsList = document.getElementById("vitalsList");
+
+  function renderVitals() {
+    if (!vitalsLogs.length) {
+      vitalsList.innerHTML = '<div class="ai-note">No vitals logged yet.</div>';
+      return;
+    }
+    vitalsList.innerHTML = vitalsLogs
+      .slice(0, 10)
+      .map(v => `
+        <div class="ai-list-item">
+          <strong>${v.glucose ? v.glucose + " mg/dL" : "No sugar"}</strong> (${v.readingType})
+          ${v.bp ? " · BP: " + v.bp : ""}
+          ${v.pulse ? " · Pulse: " + v.pulse + " bpm" : ""}
+          <br><small>${new Date(v.createdAt).toLocaleString()} ${v.notes ? " · " + v.notes : ""}</small>
+        </div>
+      `)
+      .join("");
+  }
+
+  if (saveVitalsBtn) {
+    saveVitalsBtn.addEventListener("click", () => {
+      vitalsLogs.unshift({
+        glucose: glucoseLevel.value ? Number(glucoseLevel.value) : null,
+        readingType: readingType.value,
+        bp: bpReading.value || null,
+        pulse: pulseRate.value ? Number(pulseRate.value) : null,
+        notes: vitalNotes.value.trim() || null,
+        createdAt: new Date().toISOString(),
+      });
+      saveArray(VITALS_KEY, vitalsLogs);
+      renderVitals();
+      glucoseLevel.value = "";
+      bpReading.value = "";
+      pulseRate.value = "";
+      vitalNotes.value = "";
+    });
+  }
+
+  /* ------------------------------------------------------
+     UNIVERSAL JSON SANITIZER FOR ALL GROQ RESPONSES
+  ------------------------------------------------------- */
+  function extractJSON(raw) {
+    if (!raw) return null;
+
+    let clean = raw
+      .replace(/```json/gi, "")
+      .replace(/```/g, "")
+      .trim();
+
+    const match = clean.match(/\{[\s\S]*\}/);
+
+    if (!match) return null;
+
+    try {
+      return JSON.parse(match[0]);
+    } catch {
+      return null;
+    }
+  }
+
+  /* ------------------------------------------------------
+     SYMPTOM ANALYZER — 100% FAIL-PROOF
+  ------------------------------------------------------- */
+  const analyzeSymptomsBtn = document.getElementById("analyzeSymptomsBtn");
+  const symptomResult = document.getElementById("symptomResult");
+
+  if (analyzeSymptomsBtn) {
+    analyzeSymptomsBtn.addEventListener("click", async () => {
+      const text = symptomText.value.trim();
+
+      if (!text) {
+        symptomResult.style.display = "block";
+        symptomResult.innerHTML = "<p>Please enter symptoms.</p>";
+        return;
+      }
+
+      symptomResult.style.display = "block";
+      symptomResult.innerHTML = "<p>Analyzing with AI...</p>";
+
+      try {
+        const res = await fetch("/api/analyze_symptoms", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ symptoms: text })
+        });
+
+        const data = await res.json();
+        console.log("AI RAW RESPONSE:", data.ai_result);
+
+        const ai = extractJSON(data.ai_result);
+
+        if (!ai) {
+          symptomResult.innerHTML = "<p>AI could not return valid data.</p>";
+          return;
+        }
+
+        symptomResult.innerHTML = `
+          <h4>AI Symptom Analysis</h4>
+          <p><strong>Severity:</strong> ${ai.severity}</p>
+          <p><strong>Categories:</strong> ${ai.categories?.join(", ") || "None"}</p>
+          <p><strong>Red Flags:</strong> ${ai.red_flags?.join(", ") || "None"}</p>
+          <p><strong>Recommendation:</strong><br>${ai.recommendation}</p>
+        `;
+      } catch {
+        symptomResult.innerHTML = "<p>AI Error. Try again.</p>";
+      }
+    });
+  }
+
+  /* ------------------------------------------------------
+     DOCTOR MATCH — SAFE JSON ALWAYS
+  ------------------------------------------------------- */
+  const findDoctorBtn = document.getElementById("findDoctorBtn");
+  const doctorMatchResult = document.getElementById("doctorMatchResult");
+
+  if (findDoctorBtn) {
+    findDoctorBtn.addEventListener("click", async () => {
+      doctorMatchResult.innerHTML = "<p>Contacting AI...</p>";
+
+      try {
+        const res = await fetch("/api/doctor_match", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            symptoms: matchSymptom.value.trim(),
+            city: matchCity.value.trim() || "Unknown",
+          })
+        });
+
+        const data = await res.json();
+        const ai = extractJSON(data.ai_result);
+
+        if (!ai) {
+          doctorMatchResult.innerHTML = "<p>Could not parse AI response.</p>";
+          return;
+        }
+
+        doctorMatchResult.innerHTML = `
+          <div class="ai-list-item">
+            <strong>Specialty:</strong> ${ai.specialty}<br>
+            <strong>Urgency:</strong> ${ai.urgency}<br>
+            <strong>Reason:</strong> ${ai.reason}<br><br>
+            <strong>Suggested Doctors:</strong><br>
+            ${ai.suggested_doctors?.map(d => "• " + d).join("<br>") || "None"}
+          </div>
+        `;
+      } catch {
+        doctorMatchResult.innerHTML = "<p>Could not contact AI.</p>";
+      }
+    });
+  }
+  /* ------------------------------------------------------
+   ✨ GROQ — AI PRESCRIPTION ASSISTANT
+------------------------------------------------------- */
+const currentMeds = document.getElementById("currentMeds");
+const issueDesc = document.getElementById("issueDesc");
+
+const generatePrescriptionBtn = document.getElementById("generatePrescriptionBtn");
+
+if (generatePrescriptionBtn) {
+  generatePrescriptionBtn.addEventListener("click", async function () {
+    
+    const meds = currentMeds.value.trim();
+    const issue = issueDesc.value.trim();
+
+    if (!meds && !issue) {
+      alert("Enter medicines or issue first.");
+      return;
+    }
+
+    // Create temporary output box (just like symptoms)
+    let outputBox = document.getElementById("prescriptionResult");
+    if (!outputBox) {
+      const modal = document.querySelector("#prescriptionModal .ai-modal-content");
+      outputBox = document.createElement("div");
+      outputBox.id = "prescriptionResult";
+      outputBox.className = "symptom-result";
+      modal.appendChild(outputBox);
+    }
+
+    outputBox.style.display = "block";
+    outputBox.innerHTML = "<p>Generating summary with AI...</p>";
+
+    try {
+      const res = await fetch("/api/prescription_ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ meds, issue })
+      });
+
+      const data = await res.json();
+
+      let clean = data.ai_result;
+      clean = clean.replace(/```json/gi, "").replace(/```/g, "").trim();
+      const match = clean.match(/\{[\s\S]*\}/);
+
+      if (!match) {
+        outputBox.innerHTML = "<p>Bad AI format.</p><pre>" + clean + "</pre>";
+        return;
+      }
+
+      const ai = JSON.parse(match[0]);
+
+      outputBox.innerHTML = `
+        <h4>AI Prescription Summary</h4>
+        <p><strong>Summary:</strong> ${ai.summary}</p>
+
+        <p><strong>Possible Causes:</strong></p>
+        <ul>${ai.possible_causes.map(c => `<li>${c}</li>`).join("")}</ul>
+
+        <p><strong>Questions to Ask Doctor:</strong></p>
+        <ul>${ai.questions_to_ask_doctor.map(q => `<li>${q}</li>`).join("")}</ul>
+
+        <p><strong>Notes:</strong><br>${ai.notes}</p>
+      `;
+    } catch (err) {
+      outputBox.innerHTML = "<p>AI Error. Try again.</p>";
+    }
+  });
+}
+
+
+  /* ------------------------------------------------------
+     HEALTH SCORE — UNBREAKABLE JSON
+  ------------------------------------------------------- */
+  const estimateScoreBtn = document.getElementById("estimateScoreBtn");
+  const healthScoreResult = document.getElementById("healthScoreResult");
+
+  if (estimateScoreBtn) {
+    estimateScoreBtn.addEventListener("click", async () => {
+      healthScoreResult.style.display = "block";
+      healthScoreResult.innerHTML = "<p>Calculating...</p>";
+
+      try {
+        const res = await fetch("/api/healthscore_ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            age: hsAge.value,
+            height: hsHeight.value,
+            weight: hsWeight.value,
+            activity: hsActivity.value,
+            habits: hsHabits.value,
+          })
+        });
+
+        const data = await res.json();
+        const ai = extractJSON(data.ai_result);
+
+        if (!ai) {
+          healthScoreResult.innerHTML = "<p>AI could not calculate score.</p>";
+          return;
+        }
+
+        healthScoreResult.innerHTML = `
+          <h4>Your AI Health Score</h4>
+          <p><strong>Score:</strong> ${ai.score}</p>
+          <p><strong>BMI:</strong> ${ai.bmi} (${ai.bmi_label})</p>
+          <p><strong>Status:</strong> ${ai.status_label}</p>
+          <p><strong>Recommendations:</strong><br>${ai.recommendations?.join("<br>")}</p>
+        `;
+      } catch {
+        healthScoreResult.innerHTML = "<p>Error contacting AI.</p>";
+      }
+    });
+  }
+
+  /* ------------------------------------------------------
+     INITIAL RENDER
+  ------------------------------------------------------- */
+  renderReminders();
+  renderVitals();
+
+});
+</script>
+
+
+</body>
+</html>

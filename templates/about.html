@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About | LifeLink</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}">
+
+</head>
+<body>
+
+  <!-- Animated background layer -->
+  <div class="background-pulse">
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+  </div>
+
+  <!-- All content sits above background -->
+  <div class="page-root">
+  <div id="top"></div>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="navbar-left">
+      <div class="logo-dot"></div>
+      <span class="logo-text">LifeLink</span>
+    </div>
+    <nav class="navbar-links">
+      <a href="#top" class="active">Home</a>
+      <a href="#about">About</a>
+      <a href="#features">Features</a>
+      <a href="#vision">Vision</a>
+    </nav>
+  </header>
+
+  <!-- Floating EMERGENCY button -->
+  <button class="emergency-btn" id="emergencyBtn" aria-label="Trigger emergency">
+    <span class="emergency-dot"></span>
+    Emergency
+  </button>
+
+  <!-- Simple emergency toast (you can replace with real logic later) -->
+  <div class="emergency-toast" id="emergencyToast">
+    <div class="toast-content glass">
+      <h3>Emergency Flow Placeholder</h3>
+      <p>
+        Here you can connect to your real emergency workflow:
+        call ambulance API, trigger SOS, notify nearest hospital, etc.
+      </p>
+      <button class="btn ghost" id="closeToast">Close</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <!-- Left -->
+    <div class="hero-content glass reveal">
+      <span class="hero-badge">AI-Powered Emergency Platform</span>
+      <h1>LifeLink — Every Second Counts.</h1>
+      <p>
+        A unified emergency, blood &amp; organ availability platform that connects patients, hospitals,
+        donors and ambulances in real time — powered by AI, built to save minutes, and those minutes save lives.
+      </p>
+
+      <div class="hero-actions">
+        <a href="{{ url_for('register') }}" class="btn primary">Register Now</a>
+
+        <a href="#about" class="btn ghost">Learn More</a>
+      </div>
+
+      <div class="hero-meta">
+        <div>
+          <h3>24/7</h3>
+          <p>Continuous Monitoring</p>
+        </div>
+        <div>
+          <h3>Real-Time</h3>
+          <p>Blood &amp; Organ Data</p>
+        </div>
+        <div>
+          <h3>AI</h3>
+          <p>Emergency Triage Engine</p>
+        </div>
+      </div>
+    </div>
+
+<div class="hero-visual">
+  <div class="hero-logo">
+    <!-- LIFE / LINK cubes -->
+    <div class="wrapper-grid">
+      <!-- L -->
+      <div class="cube">
+        <div class="face face-front">L</div>
+        <div class="face face-back"></div>
+        <div class="face face-left"></div>
+        <div class="face face-right"></div>
+        <div class="face face-top"></div>
+        <div class="face face-bottom"></div>
+      </div>
+
+      <!-- I -->
+      <div class="cube">
+        <div class="face face-front">I</div>
+        <div class="face face-back"></div>
+        <div class="face face-left"></div>
+        <div class="face face-right"></div>
+        <div class="face face-top"></div>
+        <div class="face face-bottom"></div>
+      </div>
+
+      <!-- F -->
+      <div class="cube">
+        <div class="face face-front">F</div>
+        <div class="face face-back"></div>
+        <div class="face face-left"></div>
+        <div class="face face-right"></div>
+        <div class="face face-top"></div>
+        <div class="face face-bottom"></div>
+      </div>
+
+      <!-- E -->
+      <div class="cube">
+        <div class="face face-front">E</div>
+        <div class="face face-back"></div>
+        <div class="face face-left"></div>
+        <div class="face face-right"></div>
+        <div class="face face-top"></div>
+        <div class="face face-bottom"></div>
+      </div>
+
+      <!-- L -->
+      <div class="cube">
+        <div class="face face-front">L</div>
+        <div class="face face-back"></div>
+        <div class="face face-left"></div>
+        <div class="face face-right"></div>
+        <div class="face face-top"></div>
+        <div class="face face-bottom"></div>
+      </div>
+
+      <!-- I -->
+      <div class="cube">
+        <div class="face face-front">I</div>
+        <div class="face face-back"></div>
+        <div class="face face-left"></div>
+        <div class="face face-right"></div>
+        <div class="face face-top"></div>
+        <div class="face face-bottom"></div>
+      </div>
+
+      <!-- N -->
+      <div class="cube">
+        <div class="face face-front">N</div>
+        <div class="face face-back"></div>
+        <div class="face face-left"></div>
+        <div class="face face-right"></div>
+        <div class="face face-top"></div>
+        <div class="face face-bottom"></div>
+      </div>
+
+      <!-- K -->
+      <div class="cube">
+        <div class="face face-front">K</div>
+        <div class="face face-back"></div>
+        <div class="face face-left"></div>
+        <div class="face face-right"></div>
+        <div class="face face-top"></div>
+        <div class="face face-bottom"></div>
+      </div>
+    </div>
+
+    <!-- ❤️ heartbeat behind cubes -->
+    <div class="heartbeatloader">
+            <svg class="svgdraw" width="100%" height="100%" viewBox="0 0 150 400" xmlns="http://www.w3.org/2000/svg">
+                <path class="path" d="M 0 200 l 40 0 l 5 -40 l 5 40 l 10 0 l 5 15 l 10 -140 l 10 220 l 5 -95 l 10 0 l 5 20 l 5 -20 l 30 0" fill="transparent" stroke-width="4" stroke="black"></path>
+            </svg>
+            <div class="innercircle"></div>
+            <div class="outercircle"></div>
+    </div>
+  </div>
+</div>
+
+
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" class="section reveal">
+    <div class="section-header center">
+      <h2>What is LifeLink?</h2>
+      <p>
+        LifeLink is a centralized healthcare assistance system that connects
+        <strong>citizens, hospitals, blood banks, ambulance services and donors</strong>
+        under one digital roof. It tracks blood availability, organ availability, medicine stock,
+        AI-based emergency triage, health monitoring, pill reminders and donor consent — all in a single platform.
+      </p>
+    </div>
+
+    <div class="section-grid">
+      <article class="info-card glass">
+        <h3>Silent Guardian</h3>
+        <p>
+          LifeLink quietly monitors vitals, predicts emergencies before they erupt,
+          and links the right life-saving resource to the right person at the right time.
+        </p>
+      </article>
+
+      <article class="info-card glass">
+        <h3>Built for Real-World Constraints</h3>
+        <p>
+          Powered by a <strong>Flask backend</strong>, <strong>Firebase database</strong>, and a simple
+          <strong>HTML/CSS/JS frontend</strong>, LifeLink is optimized for regions where medical access is
+          unpredictable and infrastructure is limited.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="section reveal">
+    <div class="section-header center">
+      <h2>Core Capabilities</h2>
+      <p>
+        A digital bridge between patients, hospitals and emergency services — designed to reduce response time
+        and centralize life-saving information.
+      </p>
+    </div>
+
+    <div class="features-grid">
+      <article class="feature-card glass tilt-card">
+        <h3>🔴 Blood &amp; Organ Availability</h3>
+        <p>Real-time snapshot of blood units, organ listings, hospital readiness and donor availability.</p>
+      </article>
+
+      <article class="feature-card glass tilt-card">
+        <h3>🧠 AI-Based Emergency Triage</h3>
+        <p>Classifies case severity, suggests first-aid steps and notifies hospitals and ambulances instantly.</p>
+      </article>
+
+      <article class="feature-card glass tilt-card">
+        <h3>❤️ Health Monitoring &amp; Prediction</h3>
+        <p>Tracks vitals, detects anomalies and predicts possible emergencies for high-risk users.</p>
+      </article>
+
+      <article class="feature-card glass tilt-card">
+        <h3>⏰ Pill Reminders &amp; Medicine Data</h3>
+        <p>Pill schedules, refill alerts and medicine stock visibility across connected hospitals.</p>
+      </article>
+
+      <article class="feature-card glass tilt-card">
+        <h3>🎙️ Voice-Based ML Commands</h3>
+        <p>Hands-free commands for searching blood, checking organ compatibility and triggering requests.</p>
+      </article>
+
+      <article class="feature-card glass tilt-card">
+        <h3>🫂 Donor &amp; Consent Management</h3>
+        <p>Secure donor profiles, encrypted consent logs and transparent history.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- VISION -->
+  <section id="vision" class="section section-vision reveal">
+    <div class="section-header center">
+      <h2>Our Vision</h2>
+      <p>
+        To ensure no patient waits for a blood unit, no organ goes unused, no ambulance arrives too late
+        and no emergency is blind to data.
+      </p>
+    </div>
+    <div class="vision-highlight glass">
+      <p><strong>Minutes save lives. LifeLink saves minutes.</strong></p>
+    </div>
+  </section>
+
+  <!-- TEAM SECTION -->
+<section id="team" class="section reveal">
+  <div class="section-header center">
+    <h2>Meet Our Team</h2>
+    <p>
+      The minds behind LifeLink — dedicated to building life-saving technology.
+    </p>
+  </div>
+
+  <div class="team-grid">
+
+    <div class="team-card glass tilt-card">
+      <h3>Abhinav A Gowda</h3>
+      <span class="team-role">UI/UX developer</span>
+      <p>Architects the core platform and emergency automation.</p>
+    </div>
+
+    <div class="team-card glass tilt-card">
+      <h3>Karan Tej</h3>
+      <span class="team-role">AI & ML Engineerand backend</span>
+      <p>Designs triage models and real-time anomaly detection.</p>
+    </div>
+
+    <div class="team-card glass tilt-card">
+      <h3>Ganesha HK</h3>
+      <span class="team-role">Backend & Security</span>
+      <p>Ensures secure data flow and lifesaving response links.</p>
+    </div>
+
+    <div class="team-card glass tilt-card">
+      <h3>Zain Momin</h3>
+      <span class="team-role">UI/UX & Frontend</span>
+      <p>Crafts user experience that works in real emergencies.</p>
+    </div>
+
+  </div>
+</section>
+
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>© 2025 LifeLink — A Unified Emergency, Blood &amp; Organ Availability Platform powered by AI</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='about.js') }}"></script>
+
+</body>
+</html>

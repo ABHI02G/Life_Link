@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Dashboard  LifeLink</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Global styles -->
+   <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+</head>
+<body>
+  <!-- Background animation (already styled globally) -->
+  <div class="background-pulse">
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+  </div>
+
+  <!-- Sidebar backdrop (overlay, controlled by global.css + global.js) -->
+  <div class="sidebar-backdrop"></div>
+
+  <div class="layout page-root">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass">
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">LIFELINK</div>
+      </div>
+
+      <!-- Sidebar menu links -->
+      <nav class="sidebar-links">
+        <a href="{{ url_for('dashboard') }}" class="active" >Dashboard</a>
+        <a href="{{ url_for('blood') }}">Blood Database</a>
+
+        <!-- FIXED ORGAN LINK -->
+        <a href="{{ url_for('organ_database') }}">Organ Database</a>
+
+        <a href="{{ url_for('ai') }}">AI System</a>
+        <a href="{{ url_for('rare_medicine') }}">Rare Medicine &amp; Anti-venom</a>
+        <a href="{{ url_for('appointment') }}">Appointment</a>
+        <a href="{{ url_for('profile') }}">Profile</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        User Panel · LifeLink
+      </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="layout-main">
+      <!-- NAVBAR -->
+      <header class="navbar glass">
+        <div class="navbar-left">
+          <div class="logo-dot"></div>
+          <span class="logo-text">LIFELINK</span>
+        </div>
+
+        <!-- Top nav links -->
+        <nav class="navbar-links">
+          <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
+          <a href="{{ url_for('blood') }}">Blood</a>
+
+          <!-- FIXED ORGAN LINK -->
+          <a href="{{ url_for('organ_database') }}">Organs</a>
+
+          <a href="{{ url_for('ai') }}">AI</a>
+          <a href="{{ url_for('rare_medicine') }}">Rare Medicine</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('appointment') }}">Appointment</a>
+        </nav>
+
+        <button type="button" class="sidebar-toggle" aria-label="Toggle sidebar">
+          <span class="bar"></span>
+          <span class="label"></span>
+        </button>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main>
+        <section class="section">
+          <div class="section-header">
+            <h2>User Dashboard</h2>
+            <p>
+              Access all LifeLink modules from one place: blood and organ databases, AI support,
+              rare medicines, future donors and your profile.
+            </p>
+          </div>
+
+          <!-- CARD GRID -->
+          <div class="section-grid">
+
+            <!-- 1. Blood Database -->
+            <a href="{{ url_for('blood') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>Blood Database</h3>
+              <p>
+                Search blood groups, check unit availability and locate compatible donors across
+                connected hospitals.
+              </p>
+              <span class="btn primary">Open Blood Records</span>
+            </a>
+
+            <!-- 2. Organ Database -->
+            <a href="{{ url_for('organ_database') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>Organ Database</h3>
+              <p>
+                Monitor organ stock, recipient priority queues and current matching status for
+                transplants.
+              </p>
+              <span class="btn primary">View Organ Network</span>
+            </a>
+
+            <!-- 3. AI System -->
+            <a href="{{ url_for('ai') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>AI Health Intelligence</h3>
+              <p>
+                Use AI to analyze patterns, score risks and assist with donor–recipient matching.
+              </p>
+              <span class="btn primary">Launch AI Panel</span>
+            </a>
+
+            <!-- 4. Rare Medicine & Anti-venom -->
+            <a href="{{ url_for('rare_medicine') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>Rare Medicine &amp; Anti-venom</h3>
+              <p>
+                Discover rare medicines and anti-venoms, including where they are stocked and how to request them.
+              </p>
+              <span class="btn primary">Find Critical Drugs</span>
+            </a>
+
+            <!-- 5. Future Donors -->
+            <a href="{{ url_for('appointment') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>Appointments</h3>
+              <p>
+                Create new appointments
+              </p>
+              <span class="btn primary">Manage your appointments</span>
+            </a>
+
+            <!-- 6. Profile -->
+            <a href="{{ url_for('profile') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>Profile &amp; Settings</h3>
+              <p>
+                Edit your details, organization, access level and security preferences for your account.
+              </p>
+              <span class="btn primary">Edit My Profile</span>
+            </a>
+
+          </div>
+        </section>
+
+        <footer class="footer">
+          © 2025 LifeLink · User Dashboard
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- Emergency Button -->
+  <button id="emergencyBtn" class="emergency-btn">
+    <span class="emergency-dot"></span>
+    Emergency
+  </button>
+
+  <!-- Emergency Toast -->
+  <div id="emergencyToast" class="emergency-toast">
+    <div class="glass toast-content">
+      <h3>Emergency Mode Activated</h3>
+      <p>
+        Configure this section to trigger calls, SMS or alerts to your emergency response team
+        and nearby hospitals.
+      </p>
+      <button id="closeToast" class="btn ghost">Close</button>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='global.js') }}"></script>
+</body>
+</html>

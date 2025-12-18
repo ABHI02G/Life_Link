@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Organ Database | LifeLink</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Global styles -->
+<link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+
+  <style>
+    /* ------------ PAGE-SPECIFIC STYLES (Organ Database) ------------ */
+
+    .organ-section-header h2 {
+      margin-bottom: 0.3rem;
+    }
+
+    .organ-section-header p {
+      font-size: 0.9rem;
+      max-width: 640px;
+    }
+
+    /* Grid layout for the two big cards */
+    .organ-grid {
+      display: grid;
+      gap: 1.6rem;
+      align-items: stretch;
+    }
+
+    @media (min-width: 960px) {
+      .organ-grid {
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+        align-items: stretch;
+      }
+    }
+
+    /* Bigger cards */
+    .organ-card {
+      padding: 2rem 1.7rem;
+      height: 100%;
+    }
+
+    .organ-card h3 {
+      margin-bottom: 0.4rem;
+      font-size: 1.1rem;
+    }
+
+    .organ-card p {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      margin-bottom: 0.7rem;
+    }
+
+    .organ-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      align-items: flex-end;
+      margin-top: 0.4rem;
+    }
+
+    .organ-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 150px;
+    }
+
+    .organ-form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .organ-form-group select {
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      padding: 0.55rem 0.9rem;
+      font-size: 0.86rem;
+      outline: none;
+      background: #fff;
+    }
+
+    .organ-form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-soft);
+    }
+
+    .organ-info-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 0.7rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .organ-info-row span strong {
+      color: var(--primary-dark);
+    }
+
+    .organ-results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .organ-results-header h3 {
+      font-size: 1rem;
+    }
+
+    .organ-results-header span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .organ-table-wrapper {
+      margin-top: 0.3rem;
+      border-radius: 12px;
+      overflow: auto;
+      max-height: 520px;
+      border: 1px solid rgba(255, 167, 190, 0.35);
+    }
+
+    table.organ-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      min-width: 600px;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(12px);
+    }
+
+    .organ-table thead {
+      position: sticky;
+      top: 0;
+      background: #fff6fb;
+      z-index: 1;
+    }
+
+    .organ-table th,
+    .organ-table td {
+      padding: 0.6rem 0.7rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 167, 190, 0.4);
+    }
+
+    .organ-table th {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .organ-table tbody tr:hover {
+      background: rgba(255, 248, 252, 0.9);
+    }
+
+    .organ-table td small {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .btn-map {
+      font-size: 0.78rem;
+      padding: 0.45rem 0.9rem;
+      white-space: nowrap;
+    }
+
+    /* Map block */
+    .organ-map {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      height: 100%;
+    }
+
+    .organ-map p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .organ-map-frame {
+      flex: 1;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--glass-border);
+      height: 100%;
+    }
+
+    .organ-map-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /* Sticky full-height map on the right (desktop) */
+    @media (min-width: 960px) {
+      .organ-map-card {
+        position: sticky;
+        top: 6.5rem; /* below navbar */
+        height: calc(100vh - 8rem);
+        align-self: flex-start;
+      }
+    }
+
+    main {
+      padding-bottom: 0;
+    }
+    .section {
+      padding-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background animation -->
+  <div class="background-pulse">
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+  </div>
+
+  <!-- Sidebar backdrop (overlay) -->
+  <div class="sidebar-backdrop"></div>
+
+  <div class="layout page-root">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass">
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">LIFELINK</div>
+      </div>
+
+      <nav class="sidebar-links">
+       <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('blood') }}">Blood</a>
+
+          <!-- FIXED ORGAN LINK -->
+          <a href="{{ url_for('organ_database') }}" class="active">Organs</a>
+
+          <a href="{{ url_for('ai') }}">AI</a>
+          <a href="{{ url_for('rare_medicine') }}">Rare Medicine</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('appointment') }}">Appointment</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        User Panel · LifeLink
+      </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="layout-main">
+      <!-- NAVBAR -->
+      <header class="navbar glass">
+        <div class="navbar-left">
+          <div class="logo-dot"></div>
+          <span class="logo-text">LIFELINK</span>
+        </div>
+
+        <nav class="navbar-links">
+          <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('blood') }}">Blood</a>
+
+          <!-- FIXED ORGAN LINK -->
+          <a href="{{ url_for('organ_database') }}" class="active">Organs</a>
+
+          <a href="{{ url_for('ai') }}">AI</a>
+          <a href="{{ url_for('rare_medicine') }}">Rare Medicine</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('appointment') }}">Appointment</a>
+        </nav>
+
+        <!-- MENU button on right -->
+        <button type="button" class="sidebar-toggle" aria-label="Toggle sidebar">
+          <span class="bar"></span>
+          <span class="label"></span>
+        </button>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main>
+        <section class="section">
+          <div class="section-header organ-section-header">
+            <h2>Organ Database</h2>
+            <p>
+              Enter <strong>blood group</strong> and select an <strong>organ</strong>
+              (Kidney, Heart, Liver, Lungs, Eyes, Pancreas, Bone Marrow, Heart Valves, Skin)
+              to view matching hospitals with contact details and a live map.
+            </p>
+          </div>
+
+          <div class="organ-grid">
+            <!-- LEFT: Input + Table -->
+            <div class="glass info-card tilt-card organ-card">
+              <h3>Search by blood group &amp; organ</h3>
+              <p>
+                Filter hospitals based on required organ and compatible blood group.
+              </p>
+
+              <form class="organ-form" id="organForm">
+                <div class="organ-form-group">
+                  <label for="organBloodGroup">Blood group</label>
+                  <select id="organBloodGroup" name="bloodGroup" required>
+                    <option value="A+">A Positive (A+)</option>
+                    <option value="A-">A Negative (A-)</option>
+                    <option value="B+">B Positive (B+)</option>
+                    <option value="B-">B Negative (B-)</option>
+                    <option value="O+">O Positive (O+)</option>
+                    <option value="O-">O Negative (O-)</option>
+                    <option value="AB+">AB Positive (AB+)</option>
+                    <option value="AB-">AB Negative (AB-)</option>
+                  </select>
+                </div>
+
+                <div class="organ-form-group">
+                  <label for="organType">Organ</label>
+                  <select id="organType" name="organ" required>
+                    <!-- A + B style labels, simple + medical -->
+                    <option value="kidney">Kidney (Renal transplant)</option>
+                    <option value="heart">Heart (Cardiac transplant)</option>
+                    <option value="liver">Liver (Hepatic transplant)</option>
+                    <option value="lungs">Lungs (Pulmonary transplant)</option>
+                    <option value="eyes">Eyes (Corneal tissue)</option>
+                    <option value="pancreas">Pancreas (Pancreas graft)</option>
+                    <option value="bone-marrow">Bone Marrow (Bone marrow transplant)</option>
+                    <option value="heart-valves">Heart Valves (Valvular transplant)</option>
+                    <option value="skin">Skin (Skin graft)</option>
+                  </select>
+                </div>
+
+                <button class="btn primary" type="submit">
+                  Search availability
+                </button>
+              </form>
+
+              <div class="organ-info-row">
+                <span>
+                  <strong>Output fields:</strong>
+                  Blood group, hospital name, phone number, address, map.
+                </span>
+              </div>
+
+              <div class="organ-results" style="margin-top: 1rem;">
+                <div class="organ-results-header">
+                  <h3>Matching hospitals</h3>
+                  <span id="organResultsCount">0 hospitals found</span>
+                </div>
+
+                <div class="organ-table-wrapper">
+                  <table class="organ-table" aria-describedby="organResultsCount">
+                    <thead>
+                      <tr>
+                        <th>Blood group</th>
+                        <th>Organ</th>
+                        <th>Hospital name</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Map</th>
+                      </tr>
+                    </thead>
+                    <tbody id="organResultsBody">
+                      <!-- JS fills -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT: Map (sticky) -->
+            <div class="glass info-card tilt-card organ-card organ-map organ-map-card">
+              <h3>Hospital Map</h3>
+              <p id="organMapDescription">
+                Tap “View” in the table to focus the map on a specific transplant / donor center.
+              </p>
+              <div class="organ-map-frame">
+                <iframe
+                  id="organMapFrame"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  src="https://www.google.com/maps?q=organ+transplant+hospital+near+me&output=embed"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          © 2025 LifeLink · Organ Database
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- Emergency Button -->
+  <button id="emergencyBtn" class="emergency-btn">
+    <span class="emergency-dot"></span>
+    Emergency
+  </button>
+
+  <!-- Emergency Toast -->
+ <div id="emergencyToast" class="emergency-toast">
+  <div class="glass toast-content">
+    <h3>⚠ Emergency Request</h3>
+
+    <p style="color:#d00;font-weight:600;">
+      Warning: This will notify nearby hospitals & ambulance services.
+    </p>
+
+    <label>Type of Accident:</label>
+    <select id="accType" class="input">
+      <option value="road-accident">Road Accident</option>
+      <option value="fire">Fire Accident</option>
+      <option value="medical">Medical Emergency</option>
+      <option value="cardiac">Cardiac Arrest</option>
+      <option value="other">Other</option>
+    </select>
+
+    <label>Additional Notes (optional):</label>
+    <textarea id="accNotes" class="input"></textarea>
+
+    <button id="sendSOS" class="btn primary" style="width:100%;margin-top:10px">
+      Activate SOS
+    </button>
+
+    <button id="closeToast" class="btn ghost" style="width:100%;margin-top:10px">
+      Cancel
+    </button>
+  </div>
+</div>
+
+
+  <!-- Global JS (sidebar toggle + emergency logic) -->
+  <script src="global.js"></script>
+
+  <!-- Page-specific JS -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const organForm = document.getElementById("organForm");
+      const bloodSelect = document.getElementById("organBloodGroup");
+      const organSelect = document.getElementById("organType");
+      const resultsBody = document.getElementById("organResultsBody");
+      const resultsCount = document.getElementById("organResultsCount");
+      const mapFrame = document.getElementById("organMapFrame");
+      const mapDescription = document.getElementById("organMapDescription");
+
+      // Simple organ "database" with more organs (A + B naming in comments)
+      const organDatabase = [
+        // Kidney (Renal transplant)
+        {
+          bloodGroup: "A+",
+          organ: "kidney",
+          organLabel: "Kidney (Renal transplant)",
+          hospital: "City Care Transplant Center",
+          phone: "+91-98765-81001",
+          address: "12 Ring Road, Central Layout, Bengaluru",
+          mapQuery: "City Care Transplant Center, Bengaluru",
+        },
+        {
+          bloodGroup: "O+",
+          organ: "kidney",
+          organLabel: "Kidney (Renal transplant)",
+          hospital: "Elite Renal Transplant Center",
+          phone: "+91-98765-83001",
+          address: "NH-44, Outer Ring, Hyderabad",
+          mapQuery: "Elite Renal Transplant Center, Hyderabad",
+        },
+        {
+          bloodGroup: "AB-",
+          organ: "kidney",
+          organLabel: "Kidney (Renal transplant)",
+          hospital: "National Institute Organ Transplant Center",
+          phone: "+91-98765-87001",
+          address: "Science Park, Mumbai",
+          mapQuery: "National Institute Organ Transplant Center, Mumbai",
+        },
+
+        // Heart (Cardiac transplant)
+        {
+          bloodGroup: "A+",
+          organ: "heart",
+          organLabel: "Heart (Cardiac transplant)",
+          hospital: "Metro Heart Institute",
+          phone: "+91-98765-81002",
+          address: "Cardio Block, MG Road, Bengaluru",
+          mapQuery: "Metro Heart Institute, MG Road, Bengaluru",
+        },
+        {
+          bloodGroup: "AB+",
+          organ: "heart",
+          organLabel: "Heart (Cardiac transplant)",
+          hospital: "Metro City Cardiac & Transplant",
+          phone: "+91-98765-84001",
+          address: "Near Metro Station, Chennai",
+          mapQuery: "Metro City Cardiac Transplant, Chennai",
+        },
+
+        // Liver (Hepatic transplant)
+        {
+          bloodGroup: "B+",
+          organ: "liver",
+          organLabel: "Liver (Hepatic transplant)",
+          hospital: "St. Jude Liver & GI Hospital",
+          phone: "+91-98765-82001",
+          address: "Old Airport Road, Bengaluru",
+          mapQuery: "St Jude Liver Hospital, Bengaluru",
+        },
+        {
+          bloodGroup: "B-",
+          organ: "liver",
+          organLabel: "Liver (Hepatic transplant)",
+          hospital: "HopeLife Liver Transplant Unit",
+          phone: "+91-98765-86001",
+          address: "GT Road, Coimbatore",
+          mapQuery: "HopeLife Liver Transplant, Coimbatore",
+        },
+
+        // Lungs (Pulmonary transplant)
+        {
+          bloodGroup: "O+",
+          organ: "lungs",
+          organLabel: "Lungs (Pulmonary transplant)",
+          hospital: "AeroLife Pulmonary Transplant Center",
+          phone: "+91-98765-88001",
+          address: "Skyline Tower, Hyderabad",
+          mapQuery: "AeroLife Pulmonary Transplant Center, Hyderabad",
+        },
+        {
+          bloodGroup: "A-",
+          organ: "lungs",
+          organLabel: "Lungs (Pulmonary transplant)",
+          hospital: "GreenValley Lung Institute",
+          phone: "+91-98765-88002",
+          address: "Eco Park, Bengaluru",
+          mapQuery: "GreenValley Lung Institute, Bengaluru",
+        },
+
+        // Eyes (Corneal tissue)
+        {
+          bloodGroup: "O-",
+          organ: "eyes",
+          organLabel: "Eyes (Corneal tissue)",
+          hospital: "RedCross Eye & Cornea Bank",
+          phone: "+91-98765-85001",
+          address: "Civil Lines, Mysuru",
+          mapQuery: "Red Cross Eye Bank, Mysuru",
+        },
+        {
+          bloodGroup: "B+",
+          organ: "eyes",
+          organLabel: "Eyes (Corneal tissue)",
+          hospital: "SightFirst Eye & Tissue Center",
+          phone: "+91-98765-85002",
+          address: "Vision Road, Chennai",
+          mapQuery: "SightFirst Eye and Tissue Center, Chennai",
+        },
+
+        // Pancreas (Pancreas graft)
+        {
+          bloodGroup: "A+",
+          organ: "pancreas",
+          organLabel: "Pancreas (Pancreas graft)",
+          hospital: "EndoCare Pancreas Transplant Unit",
+          phone: "+91-98765-89001",
+          address: "Diabetes Block, MG Road, Bengaluru",
+          mapQuery: "EndoCare Pancreas Transplant Unit, Bengaluru",
+        },
+        {
+          bloodGroup: "O+",
+          organ: "pancreas",
+          organLabel: "Pancreas (Pancreas graft)",
+          hospital: "Metro Endocrine & Graft Center",
+          phone: "+91-98765-89002",
+          address: "Metro Complex, Hyderabad",
+          mapQuery: "Metro Endocrine and Graft Center, Hyderabad",
+        },
+
+        // Bone Marrow (Bone marrow transplant)
+        {
+          bloodGroup: "AB+",
+          organ: "bone-marrow",
+          organLabel: "Bone Marrow (Bone marrow transplant)",
+          hospital: "National Bone Marrow Center",
+          phone: "+91-98765-90001",
+          address: "Onco Block, Mumbai",
+          mapQuery: "National Bone Marrow Center, Mumbai",
+        },
+        {
+          bloodGroup: "B-",
+          organ: "bone-marrow",
+          organLabel: "Bone Marrow (Bone marrow transplant)",
+          hospital: "HopeLife Hemato-Oncology Institute",
+          phone: "+91-98765-90002",
+          address: "Cancer Care Road, Coimbatore",
+          mapQuery: "HopeLife Hemato Oncology Institute, Coimbatore",
+        },
+
+        // Heart Valves (Valvular transplant)
+        {
+          bloodGroup: "A+",
+          organ: "heart-valves",
+          organLabel: "Heart Valves (Valvular transplant)",
+          hospital: "ValveCare Cardiac Center",
+          phone: "+91-98765-91001",
+          address: "Valve Street, Bengaluru",
+          mapQuery: "ValveCare Cardiac Center, Bengaluru",
+        },
+        {
+          bloodGroup: "O-",
+          organ: "heart-valves",
+          organLabel: "Heart Valves (Valvular transplant)",
+          hospital: "Global Heart Valve Institute",
+          phone: "+91-98765-91002",
+          address: "Cardio Hub, Chennai",
+          mapQuery: "Global Heart Valve Institute, Chennai",
+        },
+
+        // Skin (Skin graft)
+        {
+          bloodGroup: "B+",
+          organ: "skin",
+          organLabel: "Skin (Skin graft)",
+          hospital: "DermaHeal Burn & Skin Graft Center",
+          phone: "+91-98765-92001",
+          address: "Burn Unit Lane, Bengaluru",
+          mapQuery: "DermaHeal Burn and Skin Graft Center, Bengaluru",
+        },
+        {
+          bloodGroup: "O+",
+          organ: "skin",
+          organLabel: "Skin (Skin graft)",
+          hospital: "LifeSkin Reconstruction Institute",
+          phone: "+91-98765-92002",
+          address: "Rehab Park, Hyderabad",
+          mapQuery: "LifeSkin Reconstruction Institute, Hyderabad",
+        },
+      ];
+
+      function updateMap(mapQuery, hospitalName) {
+        if (!mapQuery) {
+          mapFrame.src =
+            "https://www.google.com/maps?q=organ+transplant+hospital+near+me&output=embed";
+          mapDescription.textContent =
+            "No precise location selected. Showing transplant hospitals near you.";
+          return;
+        }
+
+        const encoded = encodeURIComponent(mapQuery);
+        mapFrame.src = "https://www.google.com/maps?q=" + encoded + "&output=embed";
+        mapDescription.textContent =
+          "Map centered on: " + hospitalName + " (" + mapQuery + ")";
+      }
+
+      function renderResults(group, organ) {
+        const matches = organDatabase.filter(
+          (item) => item.bloodGroup === group && item.organ === organ
+        );
+
+        resultsBody.innerHTML = "";
+
+        if (!matches.length) {
+          resultsBody.innerHTML =
+            '<tr><td colspan="6">No hospitals found for <strong>' +
+            group +
+            "</strong> with organ <strong>" +
+            organ +
+            "</strong> in the local database. Try contacting the nearest transplant helpline.</td></tr>";
+          resultsCount.textContent = "0 hospitals found";
+          updateMap(null, null);
+          return;
+        }
+
+        matches.forEach((item) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" +
+            item.bloodGroup +
+            "</td>" +
+            "<td>" +
+            item.organLabel +
+            "</td>" +
+            "<td>" +
+            item.hospital +
+            "</td>" +
+            '<td><span>' +
+            item.phone +
+            "</span><br /><small>Tap to call from mobile</small></td>" +
+            "<td>" +
+            item.address +
+            "</td>" +
+            '<td><button type="button" class="btn ghost btn-map" data-map="' +
+            item.mapQuery.replace(/\"/g, "&quot;") +
+            '" data-hospital="' +
+            item.hospital.replace(/\"/g, "&quot;") +
+            '">View</button></td>';
+
+          resultsBody.appendChild(tr);
+        });
+
+        resultsCount.textContent =
+          matches.length +
+          " hospital" +
+          (matches.length > 1 ? "s" : "") +
+          " found";
+
+        const mapButtons = resultsBody.querySelectorAll(".btn-map");
+        mapButtons.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const mapQuery = this.getAttribute("data-map");
+            const hospitalName = this.getAttribute("data-hospital");
+            updateMap(mapQuery, hospitalName);
+          });
+        });
+
+        const first = matches[0];
+        if (first) {
+          updateMap(first.mapQuery, first.hospital);
+        }
+      }
+
+      organForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const group = bloodSelect.value;
+        const organ = organSelect.value;
+        renderResults(group, organ);
+      });
+
+      // Initial render with defaults
+      renderResults(bloodSelect.value, organSelect.value);
+    });
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- Organ Firebase Logic -->
+<script src="{{ url_for('static', filename='organ.js') }}"></script>
+
+<!-- Global JS (sidebar, tilt, emergency) -->
+<script src="{{ url_for('static', filename='global.js') }}"></script>
+</body>
+</html>

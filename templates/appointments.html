@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Appointments | LifeLink</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+
+  <style>
+    /* Page-specific styles (keeps the LifeLink look) */
+    .appointments-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    @media (min-width: 1024px) {
+      .appointments-grid {
+        grid-template-columns: 1fr 420px;
+        display: grid;
+        gap: 1.4rem;
+        align-items: start;
+      }
+    }
+
+    .card {
+      padding: 1.6rem;
+    }
+
+    .card h3 {
+      margin: 0 0 0.4rem 0;
+    }
+
+    .subtext {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .form-row {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    @media (min-width:640px) {
+      .form-row.two-col { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+
+    .form-group label { font-size:0.82rem; color:var(--text-muted); display:block; margin-bottom:0.28rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      width:100%;
+      padding:0.6rem 0.8rem;
+      border-radius:10px;
+      border:1px solid var(--glass-border);
+      font-size:0.92rem;
+      background:#fff;
+    }
+
+    .small-note { font-size:0.78rem; color:var(--text-muted); margin-top:0.4rem; }
+
+    .appointments-list {
+      display:flex;
+      flex-direction:column;
+      gap:0.6rem;
+      max-height:540px;
+      overflow:auto;
+      margin-top:0.6rem;
+    }
+
+    .appt-item {
+      padding:0.6rem;
+      border-radius:10px;
+      border:1px solid rgba(255,167,190,0.4);
+      background: rgba(255,255,255,0.96);
+      display:flex;
+      justify-content:space-between;
+      gap:0.6rem;
+      align-items:center;
+    }
+
+    .appt-meta { display:flex; flex-direction:column; gap:0.14rem; }
+    .appt-actions { display:flex; gap:0.45rem; align-items:center; }
+    .pill { padding:0.18rem 0.5rem; border-radius:999px; font-size:0.78rem; border:1px solid rgba(0,0,0,0.06); background:#fff; }
+
+    .muted { color:var(--text-muted); font-size:0.82rem; }
+
+    .btn-xs { padding:0.32rem 0.6rem; font-size:0.78rem; }
+  </style>
+</head>
+<body>
+  <!-- layout / sidebar handled by global files -->
+  <div class="layout page-root">
+    <aside class="sidebar glass">
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">LIFELINK</div>
+      </div>
+   <nav class="sidebar-links">
+         <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('blood') }}">Blood Database</a>
+
+        <!-- FIXED ORGAN LINK -->
+        <a href="{{ url_for('organ_database') }}">Organ Database</a>
+
+        <a href="{{ url_for('ai') }}">AI System</a>
+        <a href="{{ url_for('rare_medicine') }}">Rare Medicine &amp; Anti-venom</a>
+        <a href="future-donors.html">Future Donors</a>
+        <a href="{{ url_for('profile') }}">Profile</a>
+      </nav>
+      <div class="sidebar-footer">User Panel · LifeLink</div>
+    </aside>
+
+    <div class="layout-main">
+      <header class="navbar glass">
+        <div class="navbar-left">
+          <div class="logo-dot"></div>
+          <span class="logo-text">LIFELINK</span>
+        </div>
+         <nav class="navbar-links">
+          <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('blood') }}">Blood</a>
+
+          <!-- FIXED ORGAN LINK -->
+          <a href="{{ url_for('organ_database') }}">Organs</a>
+
+          <a href="{{ url_for('ai') }}">AI</a>
+          <a href="{{ url_for('rare_medicine') }}">Rare Medicine</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+        </nav>
+        <button class="sidebar-toggle" aria-label="Toggle sidebar"><span class="bar"></span></button>
+      </header>
+
+      <main>
+        <section class="section">
+          <div class="section-header">
+            <h2>Appointments</h2>
+            <p class="subtext">Schedule and manage appointments. You can optionally push a reminder into the AI reminders store.</p>
+          </div>
+
+          <div class="appointments-grid">
+            <!-- Left: Create / Edit form + list -->
+            <div class="card glass">
+              <h3 id="formTitle">New appointment</h3>
+              <p class="small-note">Fill the form to create an appointment. Appointment ID is auto-generated.</p>
+
+              <form id="appointmentForm">
+                <div class="form-row two-col" style="margin-top:0.6rem;">
+                  <div class="form-group">
+                    <label for="hospitalSelect">Hospital</label>
+                    <input id="hospitalInput" type="text" placeholder="Hospital Name">
+
+                  </div>
+
+                  <div class="form-group">
+                    <label for="doctorInput">Doctor</label>
+                    <input id="doctorInput" type="text" placeholder="Dr. Name / Speciality" />
+                  </div>
+                </div>
+
+                <div class="form-row two-col" style="margin-top:0.6rem;">
+                  <div class="form-group">
+                    <label for="dateInput">Date</label>
+                    <input id="dateInput" type="date" />
+                  </div>
+                  <div class="form-group">
+                    <label for="timeInput">Time</label>
+                    <input id="timeInput" type="time" />
+                  </div>
+                </div>
+
+                <div class="form-row" style="margin-top:0.6rem;">
+                  <div class="form-group">
+                    <label for="notesInput">Notes (optional)</label>
+                    <textarea id="notesInput" placeholder="Reason for visit, symptoms..."></textarea>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:0.8rem;align-items:center;margin-top:0.6rem;">
+                  <label style="display:inline-flex;align-items:center;gap:0.45rem;">
+                    <input type="checkbox" id="createReminder" />
+                    <span class="muted">Create a reminder in AI Reminders</span>
+                  </label>
+
+                  <div style="margin-left:auto;">
+                    <button type="button" class="btn ghost" id="resetFormBtn">Reset</button>
+                    <button type="submit" class="btn primary" id="submitApptBtn">Save appointment</button>
+                  </div>
+                </div>
+
+                <input type="hidden" id="editingId" value="" />
+              </form>
+
+              <hr style="margin:1rem 0;border:none;border-top:1px solid rgba(0,0,0,0.04);" />
+
+              <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="muted" id="appointmentsCount">0 appointments</div>
+                  <div>
+                    <button id="clearAllBtn" class="btn ghost btn-xs">Clear all</button>
+                  </div>
+                </div>
+
+                <div class="appointments-list" id="appointmentsList" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <!-- Right: Quick summary & helper -->
+            <div class="card glass">
+              <h3>Quick Info</h3>
+              <p class="small-note">Auto-filled hospitals come from your Ambulance / Hospital profile and Profile preferred hospital.</p>
+
+              <div style="margin-top:0.6rem;">
+                <div class="muted">Last saved hospital</div>
+                <div id="lastHospital" class="pill" style="margin-top:0.5rem;">—</div>
+              </div>
+
+              <div style="margin-top:0.9rem;">
+                <div class="muted">Upcoming (next 3)</div>
+                <div id="nextThree" style="margin-top:0.6rem;"></div>
+              </div>
+
+              <div style="margin-top:0.9rem;">
+                <div class="muted">Notes</div>
+                <div class="small-note" style="margin-top:0.5rem;">
+                  If you check <strong>"Create a reminder"</strong> the appointment will also add a local reminder entry (lifelink_reminders_v1) with the appointment time.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">© 2025 LifeLink · Appointments</footer>
+      </main>
+    </div>
+  </div>
+  
+   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+  <script src="{{ url_for('static', filename='global.js') }}"></script>
+  <script>
+  // FRONTEND USER FIREBASE CONFIG (REALTIME DB)
+  const userconfig = {
+    apiKey: "AIzaSyDQhYxw8xDgFZ-lW2r-62pTXV62RsnJlsI",
+    authDomain: "user-30233.firebaseapp.com",
+    projectId: "user-30233",
+    storageBucket: "user-30233.appspot.com",
+    messagingSenderId: "247559550638",
+    appId: "1:247559550638:web:581f6fa3f8bc12bc76df3f",
+    measurementId: "G-WD61D4DDV6",
+    databaseURL: "https://user-30233-default-rtdb.firebaseio.com"
+  };
+
+  firebase.initializeApp(userconfig);
+</script>
+
+  <script>
+// =====================================================
+// USER APPOINTMENTS SYSTEM  (USING userconfig FIREBASE)
+// =====================================================
+
+// Firebase already initialized in global.js using userconfig
+// So we ONLY use firebase.database() — NO second app.
+const fbDB = firebase.database();
+const USER_UID = "{{ user_uid }}";
+
+
+// --------------------
+// Form elements
+// --------------------
+const hospitalInput = document.getElementById("hospitalInput");
+
+const doctorInput   = document.getElementById("doctorInput");
+const dateInput     = document.getElementById("dateInput");
+const timeInput     = document.getElementById("timeInput");
+const notesInput    = document.getElementById("notesInput");
+const createReminder = document.getElementById("createReminder");
+const appointmentsList = document.getElementById("appointmentsList");
+const appointmentsCount = document.getElementById("appointmentsCount");
+const nextThree = document.getElementById("nextThree");
+const lastHospital = document.getElementById("lastHospital");
+const clearAllBtn = document.getElementById("clearAllBtn");
+const editingId = document.getElementById("editingId");
+const submitApptBtn = document.getElementById("submitApptBtn");
+
+// --------------------
+// State
+// --------------------
+let appointments = [];
+let allHospitals = [];
+
+// --------------------
+// Generate unique Appointment ID
+// --------------------
+function genApptId() {
+  return "APPT-" + Date.now().toString(36).toUpperCase().slice(-6);
+}
+
+// =====================================================
+// LOAD ALL HOSPITALS FOR MATCHING
+// =====================================================
+async function preloadHospitals() {
+  try {
+    const res = await fetch("/api/hospitals/all");
+    const json = await res.json();
+    allHospitals = json.hospitals || [];
+  } catch (e) {
+    console.error("Error loading hospitals:", e);
+  }
+}
+
+// =====================================================
+// HOSPITAL NAME → AUTO DOCTOR AVAILABILITY
+// =====================================================
+hospitalInput.addEventListener("input", () => {
+  const name = hospitalInput.value.trim().toLowerCase();
+  if (!name) {
+    doctorInput.placeholder = "Dr. Name / Speciality";
+    return;
+  }
+
+  const match = allHospitals.find(h => h.name.toLowerCase() === name);
+  if (!match) {
+    doctorInput.placeholder = "No doctors found";
+    return;
+  }
+
+  loadDoctorAvailability(match.hospitalUid);
+});
+
+// Fetch hospital’s doctor availability
+async function loadDoctorAvailability(uid) {
+  try {
+    const res = await fetch(`/api/hospital/appointments/get?hospitalUid=${uid}`);
+    const json = await res.json();
+    const list = Object.values(json.data || {});
+
+    if (!list.length) {
+      doctorInput.placeholder = "No doctors available";
+      return;
+    }
+
+    const first = list[0];
+    doctorInput.placeholder = `${first.doctor} (${new Date(first.datetime).toLocaleString()})`;
+  } catch (e) {
+    console.error("Error loading doctor availability:", e);
+  }
+}
+
+// =====================================================
+// REALTIME LISTENER (USER APPOINTMENTS)
+// =====================================================
+function startListener() {
+  fbDB.ref(`user_appointments/${USER_UID}`).on("value", snap => {
+    const val = snap.val() || {};
+    appointments = Object.entries(val).map(([key, data]) => ({ key, data }));
+    renderAppointments();
+  });
+}
+
+// =====================================================
+// RENDER APPOINTMENTS LIST + UPCOMING
+// =====================================================
+function renderAppointments() {
+  appointmentsList.innerHTML = "";
+
+  if (!appointments.length) {
+    appointmentsList.innerHTML = `<div class="muted">No appointments scheduled.</div>`;
+    appointmentsCount.textContent = "0 appointments";
+    nextThree.innerHTML = `<div class="muted">No upcoming</div>`;
+    return;
+  }
+
+  appointmentsCount.textContent = `${appointments.length} appointments`;
+
+  const now = new Date();
+  const upcoming = appointments
+    .filter(a => new Date(a.data.datetime) >= now)
+    .slice(0, 3);
+
+  nextThree.innerHTML = "";
+  if (!upcoming.length) {
+    nextThree.innerHTML = `<div class="muted">No upcoming</div>`;
+  } else {
+    upcoming.forEach(u => {
+      const d = new Date(u.data.datetime);
+      const pill = document.createElement("div");
+      pill.className = "pill";
+      pill.textContent = `${u.data.hospitalName} • ${u.data.doctor} • ${d.toLocaleString()}`;
+      nextThree.appendChild(pill);
+    });
+  }
+
+  appointments.forEach(rec => {
+    const a = rec.data;
+
+    const row = document.createElement("div");
+    row.className = "appt-item";
+    row.innerHTML = `
+      <div class="appt-meta">
+        <strong>${a.hospitalName}</strong> • ${a.doctor}
+        <div class="muted">${new Date(a.datetime).toLocaleString()}</div>
+        <div class="muted">ID: ${a.apptId}</div>
+      </div>
+      <div class="appt-actions">
+        <button class="btn ghost btn-xs" data-edit="${rec.key}">Edit</button>
+        <button class="btn ghost btn-xs" data-del="${rec.key}">Delete</button>
+      </div>
+    `;
+    appointmentsList.appendChild(row);
+  });
+}
+
+// =====================================================
+// SAVE / UPDATE APPOINTMENT
+// =====================================================
+async function saveAppointment(key = null) {
+  const hosp = hospitalInput.value.trim();
+  if (!hosp) return alert("Enter hospital name");
+
+  const dt = new Date(`${dateInput.value}T${timeInput.value}`).toISOString();
+
+  const appt = {
+    apptId: key
+      ? appointments.find(a => a.key === key).data.apptId
+      : genApptId(),
+    hospitalName: hosp,
+    doctor: doctorInput.value.trim(),
+    notes: notesInput.value.trim(),
+    datetime: dt,
+    createdAt: new Date().toISOString()
+  };
+
+  const ref = fbDB.ref(`user_appointments/${USER_UID}`);
+
+  if (key) await ref.child(key).update(appt);
+  else await ref.push(appt);
+}
+
+// =====================================================
+// EDIT / DELETE BUTTON HANDLER
+// =====================================================
+appointmentsList.addEventListener("click", e => {
+  const key = e.target.dataset.edit;
+  const del = e.target.dataset.del;
+
+  // Edit appointment
+  if (key) {
+    const rec = appointments.find(a => a.key === key).data;
+
+    hospitalInput.value = rec.hospitalName;
+    doctorInput.value = rec.doctor;
+    notesInput.value = rec.notes;
+
+    const dt = new Date(rec.datetime);
+    dateInput.value = dt.toISOString().slice(0, 10);
+    timeInput.value = dt.toTimeString().slice(0, 5);
+
+    editingId.value = key;
+    submitApptBtn.textContent = "Update appointment";
+  }
+
+  // Delete
+  if (del) {
+    if (confirm("Delete appointment?")) {
+      fbDB.ref(`user_appointments/${USER_UID}/${del}`).remove();
+    }
+  }
+});
+
+// =====================================================
+// FORM SUBMIT
+// =====================================================
+document.getElementById("appointmentForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  await saveAppointment(editingId.value || null);
+
+  editingId.value = "";
+  e.target.reset();
+  submitApptBtn.textContent = "Save appointment";
+});
+
+// =====================================================
+// CLEAR ALL BUTTON
+// =====================================================
+clearAllBtn.addEventListener("click", () => {
+  if (confirm("Clear all appointments?")) {
+    fbDB.ref(`user_appointments/${USER_UID}`).remove();
+  }
+});
+
+// =====================================================
+// INIT
+// =====================================================
+preloadHospitals();
+startListener();
+
+</script>
+
+
+
+<!-- ===== END FINAL USER APPOINTMENTS SCRIPT ===== -->
+
+
+<!-- ===== END FINAL USER APPOINTMENTS SCRIPT ===== -->
+
+<!-- ===== END REPLACEMENT BLOCK ===== -->
+
+</body>
+</html>

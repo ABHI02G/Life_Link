@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hospital Dashboard  LifeLink</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Global styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='h_global2.css') }}">
+</head>
+<body>
+  <!-- Background animation (already styled globally) -->
+  <div class="background-pulse">
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+  </div>
+
+  <!-- Sidebar backdrop (overlay, controlled by global.css + global.js) -->
+  <div class="sidebar-backdrop"></div>
+
+  <div class="layout page-root">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass">
+      <!-- (Removed sidebar-close button so only one X exists: the MENU button morph) -->
+
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">LIFELINK</div>
+      </div>
+
+      <!-- Sidebar menu links -->
+      <nav class="sidebar-links">
+        <a href="{{ url_for('h_dashboard') }}" class="active">Dashboard</a>
+        <a href="{{ url_for('hblood') }}"  >Blood database</a>
+        <a href = "{{url_for('horgan')}}">Organ Database</a>
+        <a href="{{ url_for('drugi') }}">Drug-inventory</a>
+        <a href="{{ url_for('happointment') }}">Appointemts database</a>
+        <a href="h_future-donors.html">Donor records</a>
+        <a href="{{ url_for('ambulance') }}">Ambulance</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        User Panel · LifeLink
+      </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="layout-main">
+      <!-- NAVBAR -->
+      <header class="navbar glass">
+        <div class="navbar-left">
+          <div class="logo-dot"></div>
+          <span class="logo-text">LIFELINK</span>
+        </div>
+
+        <!-- Top nav links (desktop; hidden on mobile by your CSS) -->
+        <nav class="navbar-links">
+          <a href="{{ url_for('h_dashboard') }}" class="active">Dashboard</a>
+          <a href="{{ url_for('hblood') }}">Blood database</a>
+          <a href = "{{url_for('horgan')}}">Organ Database</a>
+          <a href="{{ url_for('drugi') }}">Drug-inventory</a>
+          <a href="{{ url_for('ambulance') }}">Ambulance</a>
+          <a href="{{ url_for('happointment') }}">Appointemts database</a>
+        </nav>
+
+        <!-- MENU button on right (hamburger → X handled by CSS + JS) -->
+        <button type="button" class="sidebar-toggle" aria-label="Toggle sidebar">
+          <span class="bar"></span>
+          <span class="label"></span>
+        </button>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main>
+        <section class="section">
+          <div class="section-header">
+            <h2>Hospital Dashboard</h2>
+            <p>
+              Access and update all LifeLink modules from one place: blood and organ entry,
+              rare medicines, all donors
+            </p>
+          </div>
+
+          <!-- CARD GRID -->
+          <div class="section-grid">
+            <!-- 1. Blood Database -->
+            <a href="{{ url_for('hblood') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>Blood Database</h3>
+              <p>
+                check and update the blood record in your hospital
+              </p>
+              <span class="btn primary">update Blood Records</span>
+            </a>
+
+            <!-- 2. Organ Database -->
+            <a href="{{ url_for('horgan') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>Organ Database</h3>
+              <p>
+                Update the organ stocks in the hospital 
+              </p>
+              <span class="btn primary">Update Organ Availability</span>
+            </a>
+
+            <!-- 3. AI System -->
+            <a href="{{ url_for('drugi') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>Drug inventory</h3>
+              <p>
+                Manage drugs and tools in the hospital.
+              </p>
+              <span class="btn primary">Launch Inventory</span>
+            </a>
+
+            <!-- 4. Rare Medicine & Anti-venom -->
+            <a href="{{ url_for('happointment') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>Appointemts database &amp; Doctor appointment</h3>
+              <p>
+                Manage and store doctor appointments
+              </p>
+              <span class="btn primary">Doctor network</span>
+            </a>
+
+            <!-- 5. Future Donors -->
+            <a href="{{ url_for('nurse') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>Nurse scheduler</h3>
+              <p>
+                Manage and operate nurse activity throught the hospital
+              </p>
+              <span class="btn primary">Manage Nurse Network</span>
+            </a>
+
+            <!-- 6. Profile -->
+            <a href="{{ url_for('ambulance') }}"
+               class="glass info-card tilt-card"
+               style="text-decoration: none; color: inherit;">
+              <h3>Ambulance</h3>
+              <p>
+                track your ambulances and record of their work
+              </p>
+              <span class="btn primary">access ambulance data</span>
+            </a>
+          </div>
+        </section>
+
+        <footer class="footer">
+          © 2025 LifeLink · Hospital Dashboard
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- Global JS (sidebar toggle + emergency logic) -->
+  <script src="{{ url_for('static', filename='h_global.js') }}"></script>
+  <script>
+    window.HOSPITAL_UID = "{{ session['uid'] }}";
+</script>
+<script src="{{ url_for('static', filename='h_appointments.js') }}"></script>
+
+</body>
+</html>

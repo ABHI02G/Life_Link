@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lifelink — Login</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
+
+<body class="user-mode">
+  <main class="auth-shell">
+
+    <!-- Brand / Left -->
+    <section class="brand-side">
+      <div class="brand-overlay"></div>
+      <div class="brand-content">
+        <h1 class="brand-logo">
+          <span class="brand-main">LIFE</span><span class="brand-sub">LINK</span>
+        </h1>
+
+        <p class="brand-tagline">
+          Log in as a <strong id="modeLabel">User</strong> to access LifeLink’s emergency-ready features.
+        </p>
+
+        <ul class="brand-points">
+          <li>✓ View your medical profile quickly</li>
+          <li>✓ Save emergency contacts & hospitals</li>
+          <li>✓ Get faster help when it matters</li>
+        </ul>
+
+        <small class="brand-note">Secure. Fast. Life-first.</small>
+      </div>
+    </section>
+
+    <!-- Forms / Right -->
+    <section class="form-side">
+
+      <!-- Toggle -->
+      <div class="capsule-wrapper">
+        <div class="capsule" id="capsule">
+          <div class="slider-pill" id="sliderPill"></div>
+          <button id="userBtn" class="cap-btn active" type="button">User</button>
+          <button id="hospitalBtn" class="cap-btn" type="button">Hospital</button>
+        </div>
+      </div>
+
+      <div class="forms-wrapper">
+
+        <!-- USER LOGIN -->
+        <form id="userForm" class="auth-form active">
+          <h2>User Login</h2>
+          <p class="form-subtitle">Welcome back.</p>
+
+          <div class="input-group">
+            <label for="u_email">Email</label>
+            <input type="email" id="u_email" required />
+          </div>
+
+          <div class="input-group">
+            <label for="u_pass">Password</label>
+            <input type="password" id="u_pass" required />
+          </div>
+
+          <button id="userSubmit" class="btn primary-btn user-color" type="submit">
+            Log in as User
+          </button>
+
+          <p class="form-footer">
+            New here? <a href="{{ url_for('register') }}">Create an account</a>
+          </p>
+        </form>
+
+        <!-- HOSPITAL LOGIN -->
+        <form id="hospitalForm" class="auth-form">
+          <h2>Hospital Login</h2>
+          <p class="form-subtitle">For verified hospital personnel.</p>
+
+          <div class="input-group">
+            <label for="h_email">Official Email</label>
+            <input type="email" id="h_email" required />
+          </div>
+
+          <div class="input-group">
+            <label for="h_pass">Password</label>
+            <input type="password" id="h_pass" required />
+          </div>
+
+          <button id="hospitalSubmit" class="btn primary-btn hosp-color" type="submit">
+            Log in as Hospital
+          </button>
+
+          <p class="form-footer">
+            Not onboarded? <a href="{{ url_for('register') }}">Register hospital</a>
+          </p>
+        </form>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='login.js') }}"></script>
+</body>
+</html>

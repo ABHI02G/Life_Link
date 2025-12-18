@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hospital Blood Inventory</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- GLOBAL FILES -->
+<link rel="stylesheet" href="{{ url_for('static', filename='h_global2.css') }}">
+
+
+<style>
+
+/* PAGE LAYOUT */
+.page {
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 0.9fr 2fr;
+    gap: 2rem;
+}
+
+/* FORM CARD */
+.form-card {
+    border-radius: 18px;
+    padding: 1.6rem;
+}
+
+.form-card h2 {
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.input-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-weight: 600;
+    margin-bottom: .3rem;
+}
+
+.input-group input,
+.input-group select {
+    padding: .7rem .9rem;
+    border-radius: 12px;
+    border: 1px solid rgba(120,180,255,.7);
+}
+
+/* TABLE PANEL */
+.table-card {
+    border-radius: 18px;
+    padding: 1.5rem;
+}
+
+.table-card h2 {
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+}
+
+/* SEARCH + FILTER BAR */
+.search-filter {
+    display: flex;
+    gap: .7rem;
+    margin-bottom: 1.2rem;
+}
+
+.search-filter input,
+.search-filter select {
+    padding: .7rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(120,180,255,.7);
+}
+
+/* STATS */
+.inventory-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+}
+
+.stat-pill {
+    padding: .6rem 1rem;
+    border-radius: 12px;
+    background: rgba(0,120,255,.12);
+    border: 1px solid rgba(0,120,255,.35);
+    font-size: .85rem;
+}
+
+/* TABLE HEADER & ROWS */
+.table-header,
+.table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.6fr 1.6fr 0.8fr;
+    padding: .9rem 1rem;
+}
+
+.table-header {
+    font-weight: 700;
+    border-bottom: 1px solid rgba(0,120,255,.25);
+}
+
+.table-row {
+    margin-bottom: .6rem;
+    border-radius: 12px;
+    border-left: 4px solid var(--primary);
+    transition: 0.2s ease;
+}
+
+.table-row:hover {
+    background: rgba(0,120,255,.10);
+    transform: translateY(-2px);
+}
+
+/* ACTION BUTTONS */
+.row-actions {
+    display: flex;
+    gap: .6rem;
+}
+
+.edit-btn,
+.delete-btn {
+    padding: .4rem .7rem;
+    border-radius: 10px;
+    font-size: .75rem;
+    cursor: pointer;
+    border: none;
+}
+
+.edit-btn { background: #ffe27a; }
+.delete-btn { background: #ff6b6b; color: white; }
+
+/* TOAST */
+.toast {
+    position: fixed;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 1rem 1.4rem;
+    background: rgba(0,120,255,.95);
+    color: white;
+    border-radius: 12px;
+    display: none;
+    z-index: 2000;
+}
+</style>
+</head>
+
+<div class="sidebar-backdrop"></div>
+
+  <div class="layout page-root">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass">
+      <!-- (Removed sidebar-close button so only one X exists: the MENU button morph) -->
+
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">LIFELINK</div>
+      </div>
+
+      <!-- Sidebar menu links -->
+      <nav class="sidebar-links">
+         <a href="{{ url_for('h_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('hblood') }}" class="active">Blood database</a>
+        <a href = "{{url_for('horgan')}}">Organ Database</a>
+        <a href="{{ url_for('drugi') }}">Drug-inventory</a>
+        <a href="{{ url_for('happointment') }}">Appointemts database</a>
+        <a href="{{ url_for('nurse') }}">Nurse Schedular</a>
+        <a href="{{ url_for('ambulance') }}">Ambulance</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        User Panel · LifeLink
+      </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="layout-main">
+      <!-- NAVBAR -->
+      <header class="navbar glass">
+        <div class="navbar-left">
+          <div class="logo-dot"></div>
+          <span class="logo-text">LIFELINK</span>
+        </div>
+
+        <!-- Top nav links (desktop; hidden on mobile by your CSS) -->
+        <nav class="navbar-links">
+           <a href="{{ url_for('h_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('hblood') }}" class="active">Blood database</a>
+        <a href = "{{url_for('horgan')}}">Organ Database</a>
+        <a href="{{ url_for('drugi') }}">Drug-inventory</a>
+        <a href="{{ url_for('happointment') }}">Appointemts database</a>
+        <a href="{{ url_for('nurse') }}">Nurse Schedular</a>
+        <a href="{{ url_for('ambulance') }}">Ambulance</a>
+        </nav>
+
+        <!-- MENU button on right (hamburger → X handled by CSS + JS) -->
+        <button type="button" class="sidebar-toggle" aria-label="Toggle sidebar">
+          <span class="bar"></span>
+          <span class="label"></span>
+        </button>
+      </header>
+
+<body>
+
+<div class="page">
+
+    <!-- FORM -->
+    <div class="glass tilt-card reveal form-card">
+
+        <h2>Enter Stock</h2>
+
+        <div class="input-group">
+            <label>Hospital Name</label>
+            <input type="text" id="h_name" placeholder="ABC Hospital">
+        </div>
+
+                <div class="input-group">
+            <label>Hospital Address</label>
+            <input type="text" id="h_address" placeholder="ABC street">
+        </div>
+        
+        <div class="input-group">
+            <label>Blood Type</label>
+            <select id="bloodType">
+                <option value="">Select</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>O+</option><option>O-</option>
+                <option>AB+</option><option>AB-</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Component</label>
+            <select id="component">
+                <option value="">Select</option>
+                <option>Plasma</option>
+                <option>Platelets</option>
+                <option>WBC</option>
+                <option>RBC</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Quantity (ml)</label>
+            <input type="number" id="q_quantity">
+        </div>
+
+        <div class="input-group">
+            <label>Date</label>
+            <input type="datetime-local" id="entryDate">
+        </div>
+
+        <!-- + Upload Button -->
+        <button id="uploadBtn"
+            style="
+                position: fixed;
+                bottom: 1.6rem;
+                right: 1.6rem;
+                z-index: 3000;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                background:#0078ff;
+                color:white;
+                border:none;
+                font-size:1.5rem;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                cursor:pointer;
+            ">
+            +
+        </button>
+
+        <input type="file" id="uploadInput" accept="application/json" style="display:none;">
+
+        <button id="addBtn" class="btn primary btn-full">Add to Inventory</button>
+
+    </div>
+
+    <!-- TABLE PANEL -->
+    <div class="glass tilt-card reveal table-card">
+
+        <h2>Blood Inventory Database</h2>
+
+        <div class="search-filter">
+            <input type="text" id="searchInput" placeholder="Search blood type or component...">
+            <select id="filterBlood">
+                <option value="">Blood Type</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>O+</option><option>O-</option>
+                <option>AB+</option><option>AB-</option>
+            </select>
+            <select id="filterComponent">
+                <option value="">Component</option>
+                <option>Plasma</option>
+                <option>Platelets</option>
+                <option>WBC</option>
+                <option>RBC</option>
+            </select>
+        </div>
+
+        <div class="inventory-stats">
+            <div class="stat-pill" id="statTotalRecords">Total Records: 0</div>
+            <div class="stat-pill" id="statTotalQty">Total Quantity: 0 ml</div>
+            <div class="stat-pill" id="statBloodTypes">Blood Types: 0</div>
+            <div class="stat-pill" id="statComponents">Components: 0</div>
+        </div>
+
+        <div class="table-header glass">
+            <span>Blood Type</span>
+            <span>Component</span>
+            <span>Qty</span>
+            <span>Date</span>
+            <span>Actions</span>
+        </div>
+
+        <div id="inventoryTable"></div>
+
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script>const HOSPITAL_UID = "{{ hospital_uid | default('') }}";</script>
+
+
+<script>
+/*
+  New front-end script:
+  - Expects HOSPITAL_UID to be injected by template:
+    <script>const HOSPITAL_UID = "{{ hospital_uid | default('') }}";
+  - Uses /api/save_blood to save, /api/get_blood_by_hospital to load all for that hospital.
+  - Keeps UI/IDs unchanged and updates table + stats immediately.
+*/
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Elements (IDs kept same)
+    const addBtn = document.getElementById("addBtn");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const uploadInput = document.getElementById("uploadInput");
+
+    const hNameInput = document.getElementById("h_name");
+    const hAddressInput = document.getElementById("h_address");
+    const bloodType = document.getElementById("bloodType");
+    const component = document.getElementById("component");
+    const quantity = document.getElementById("q_quantity");   // keep q_quantity ID
+    const entryDate = document.getElementById("entryDate");
+
+    const searchInput = document.getElementById("searchInput");
+    const filterBlood = document.getElementById("filterBlood");
+    const filterComponent = document.getElementById("filterComponent");
+
+    const statTotalRecords = document.getElementById("statTotalRecords");
+    const statTotalQty = document.getElementById("statTotalQty");
+    const statBloodTypes = document.getElementById("statBloodTypes");
+    const statComponents = document.getElementById("statComponents");
+
+    const inventoryTable = document.getElementById("inventoryTable");
+    const toastBox = document.getElementById("toast");
+
+    let inventory = [];  // array of records shown
+    let editIndex = -1;
+
+    function toast(msg) {
+        if (!toastBox) return;
+        toastBox.textContent = msg;
+        toastBox.style.display = "block";
+        setTimeout(() => toastBox.style.display = "none", 1800);
+    }
+
+    // render rows from inventory array (no UI change)
+    function renderTable() {
+        const search = (searchInput && searchInput.value || "").toLowerCase();
+        const fb = filterBlood && filterBlood.value;
+        const fc = filterComponent && filterComponent.value;
+
+        let rows = inventory.map((r, i) => ({ ...r, index: i }));
+
+        if (search) {
+            rows = rows.filter(r =>
+                (r.bloodType || "").toLowerCase().includes(search) ||
+                (r.component || "").toLowerCase().includes(search) ||
+                (r.hospitalName || "").toLowerCase().includes(search)
+            );
+        }
+        if (fb) rows = rows.filter(r => r.bloodType === fb);
+        if (fc) rows = rows.filter(r => r.component === fc);
+
+        inventoryTable.innerHTML = "";
+
+        rows.forEach(r => {
+            const row = document.createElement("div");
+            row.className = "glass table-row";
+            row.innerHTML = `
+                <span>${r.bloodType || ""}</span>
+                <span>${r.component || ""}</span>
+                <span>${r.quantity || 0} ml</span>
+                <span>${r.date || ""}</span>
+                <div class="row-actions">
+                    <button class="edit-btn">Edit</button>
+                    <button class="delete-btn">Delete</button>
+                </div>
+            `;
+            row.querySelector(".edit-btn").onclick = () => editRecord(r.index);
+            row.querySelector(".delete-btn").onclick = () => deleteRecord(r.index);
+            inventoryTable.appendChild(row);
+        });
+    }
+
+    function updateStats() {
+        statTotalRecords.textContent = "Total Records: " + inventory.length;
+        statTotalQty.textContent =
+            "Total Quantity: " +
+            inventory.reduce((sum, r) => sum + Number(r.quantity || 0), 0) +
+            " ml";
+
+        statBloodTypes.textContent =
+            "Blood Types: " + new Set(inventory.map(r => r.bloodType)).size;
+
+        statComponents.textContent =
+            "Components: " + new Set(inventory.map(r => r.component)).size;
+    }
+
+    function clearForm() {
+        hNameInput.value = "";
+        hAddressInput.value = "";
+        bloodType.value = "";
+        component.value = "";
+        quantity.value = "";
+        entryDate.value = "";
+        editIndex = -1;
+        addBtn.textContent = "Add to Inventory";
+    }
+
+    function editRecord(i) {
+        const r = inventory[i];
+        if (!r) return;
+        hNameInput.value = r.hospitalName || "";
+        hAddressInput.value = r.address || "";
+        bloodType.value = r.bloodType || "";
+        component.value = r.component || "";
+        quantity.value = r.quantity || "";
+        entryDate.value = r.date || "";
+        editIndex = i;
+        addBtn.textContent = "Update Stock";
+    }
+
+    function deleteRecord(i) {
+        // local only for now (server delete endpoint not present)
+        if (!confirm("Delete this record locally? Server delete not implemented.")) return;
+        inventory.splice(i, 1);
+        renderTable();
+        updateStats();
+        toast("Record removed (local).");
+    }
+
+    // Post payload to server
+    async function saveRecordToServer(payload) {
+        try {
+            const res = await fetch("/api/save_blood", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            return { ok: res.ok && data.status === "success", data };
+        } catch (err) {
+            console.error(err);
+            return { ok: false, data: null };
+        }
+    }
+
+    async function handleSave() {
+        const hname = (hNameInput.value || "").trim();
+        const haddr = (hAddressInput.value || "").trim();
+        const bt = (bloodType.value || "").trim();
+        const cp = (component.value || "").trim();
+        const q = Number(quantity.value || 0);
+        const dt = entryDate.value || new Date().toISOString();
+
+        if (!hname || !bt || !cp || q <= 0) {
+            alert("Please fill Hospital name, blood type, component and quantity");
+            return;
+        }
+
+        const payload = {
+            hospitalName: hname,
+            address: haddr,
+            bloodType: bt,
+            component: cp,
+            quantity: q,
+            mapQuery: hname,
+            phone: ""
+        };
+
+        addBtn.disabled = true;
+        addBtn.textContent = "Saving...";
+        const resp = await saveRecordToServer(payload);
+        addBtn.disabled = false;
+        addBtn.textContent = "Add to Inventory";
+
+        if (!resp.ok) {
+            const msg = resp.data && resp.data.message ? resp.data.message : "Failed to save";
+            toast("Save failed: " + msg);
+            return;
+        }
+
+        // server returned id — push to local list
+        const serverId = resp.data && resp.data.id ? resp.data.id : Date.now().toString();
+        const newRec = {
+            recordId: serverId,
+            hospitalUid: (typeof HOSPITAL_UID !== "undefined" ? HOSPITAL_UID : ""),
+            hospitalName: hname,
+            address: haddr,
+            mapQuery: payload.mapQuery,
+            phone: payload.phone,
+            bloodType: bt,
+            component: cp,
+            quantity: q,
+            date: dt,
+            createdAt: Math.floor(Date.now() / 1000)
+        };
+
+        if (editIndex === -1) {
+            inventory.unshift(newRec); // add at top
+            toast("Saved");
+        } else {
+            inventory[editIndex] = newRec;
+            toast("Updated");
+            editIndex = -1;
+        }
+
+        renderTable();
+        updateStats();
+        clearForm();
+    }
+
+    // Load all hospital records from new endpoint
+    async function loadHospitalRecords() {
+        inventory = [];
+        // If HOSPITAL_UID empty, try server-side session will be used (endpoint supports that)
+        const url = "/api/get_blood_by_hospital" + (typeof HOSPITAL_UID !== "undefined" && HOSPITAL_UID ? ("?hospitalUid=" + encodeURIComponent(HOSPITAL_UID)) : "");
+        try {
+            const res = await fetch(url);
+            if (!res.ok) {
+                console.warn("Could not fetch hospital records", res.status);
+                return;
+            }
+            const data = await res.json();
+            const list = data.blood_results || [];
+            for (const rec of list) {
+                inventory.push({
+                    recordId: rec.recordId || null,
+                    hospitalUid: rec.hospitalUid || (typeof HOSPITAL_UID !== "undefined" ? HOSPITAL_UID : ""),
+                    hospitalName: rec.hospitalName || "",
+                    address: rec.address || "",
+                    mapQuery: rec.mapQuery || "",
+                    phone: rec.phone || "",
+                    bloodType: rec.bloodType || "",
+                    component: rec.component || "",
+                    quantity: rec.quantity || 0,
+                    date: rec.createdAt ? new Date(Number(rec.createdAt) * 1000).toISOString().split("T").join(" ").split(".")[0] : ""
+                });
+            }
+            renderTable();
+            updateStats();
+        } catch (err) {
+            console.error("loadHospitalRecords error", err);
+        }
+    }
+
+    // JSON import: post each record to server then add locally
+    uploadBtn.addEventListener("click", () => uploadInput.click());
+    uploadInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (!file) { toast("No file selected"); return; }
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+            try {
+                const arr = JSON.parse(e.target.result);
+                if (!Array.isArray(arr)) { toast("Invalid JSON (array required)"); return; }
+                for (const it of arr) {
+                    const payload = {
+                        hospitalName: it.hospitalName || hNameInput.value || "",
+                        address: it.address || hAddressInput.value || "",
+                        bloodType: it.bloodType || it.bt || "",
+                        component: it.component || "",
+                        quantity: Number(it.quantity || 0),
+                        mapQuery: it.mapQuery || (it.hospitalName || hNameInput.value || ""),
+                        phone: it.phone || ""
+                    };
+                    if (!payload.hospitalName || !payload.bloodType || !payload.component || payload.quantity <= 0) continue;
+                    const r = await saveRecordToServer(payload);
+                    const id = r.data && r.data.id ? r.data.id : (Date.now().toString() + Math.random().toString().slice(2,6));
+                    inventory.unshift({
+                        recordId: id,
+                        hospitalUid: (typeof HOSPITAL_UID !== "undefined" ? HOSPITAL_UID : ""),
+                        hospitalName: payload.hospitalName,
+                        address: payload.address,
+                        mapQuery: payload.mapQuery,
+                        phone: payload.phone,
+                        bloodType: payload.bloodType,
+                        component: payload.component,
+                        quantity: payload.quantity,
+                        date: it.date || new Date().toISOString()
+                    });
+                }
+                renderTable();
+                updateStats();
+                toast("Imported and saved");
+            } catch (err) {
+                console.error(err);
+                toast("Error reading JSON");
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    // Wire add button
+    addBtn.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        handleSave();
+    });
+
+    // Wire filters
+    [searchInput, filterBlood, filterComponent].forEach(el => {
+        if (!el) return;
+        el.addEventListener("input", renderTable);
+        el.addEventListener("change", renderTable);
+    });
+
+    // initial load
+    loadHospitalRecords();
+
+}); // DOMContentLoaded
+</script>
+
+
+
+
+</body>
+<script src="{{ url_for('static', filename='h_blood.js') }}"></script>
+<script src="{{ url_for('static', filename='h_global.js') }}"></script>
+</html>

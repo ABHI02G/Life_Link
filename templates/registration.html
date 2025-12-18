@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeLink Registration</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='registration.css') }}">
+</head>
+
+<body class="user-mode">
+
+  <!-- Background Animation -->
+  <div class="background-pulse">
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+  </div>
+
+  <main class="auth-shell">
+
+    <!-- BRAND SIDE -->
+    <section class="brand-side">
+      <div class="brand-overlay"></div>
+      <div class="brand-content">
+        <h1 class="brand-logo">
+          <span class="brand-main">LIFE</span><span class="brand-sub">LINK</span>
+        </h1>
+
+        <h2>Welcome!</h2>
+        <p class="brand-tagline" id="brandTagline">
+          Register as a <strong>User</strong> to access LifeLink’s emergency-ready features.
+        </p>
+
+        <ul class="brand-points" id="brandPoints"></ul>
+      </div>
+    </section>
+
+    <!-- FORM SIDE -->
+    <section class="form-side">
+
+      <!-- USER / HOSPITAL TOGGLE -->
+      <div class="capsule-wrapper">
+        <div class="capsule" id="capsule">
+          <div class="slider-pill" id="sliderPill"></div>
+
+          <button id="userBtn" class="cap-btn active" type="button">User</button>
+          <button id="hospitalBtn" class="cap-btn" type="button">Hospital</button>
+        </div>
+      </div>
+
+      <!-- FORMS CONTAINER -->
+      <div class="forms-wrapper">
+
+        <!-- USER REGISTRATION -->
+        <form id="userForm" class="auth-form active">
+          <h2>User Registration</h2>
+
+          <div class="input-group">
+            <label for="u_name">Full Name</label>
+            <input type="text" id="u_name" placeholder="Your Name" required />
+          </div>
+
+          <div class="input-group">
+            <label for="u_age">Age</label>
+            <input type="number" id="u_age" placeholder="Age" required />
+          </div>
+
+          <div class="input-group">
+            <label for="u_email">Email</label>
+            <input type="email" id="u_email" placeholder="you@example.com" required />
+          </div>
+
+          <div class="input-group">
+            <label for="u_pass">Password</label>
+            <input type="password" id="u_pass" placeholder="••••••••" required />
+          </div>
+
+          <button id="userLoginBtn" class="btn primary-btn user-color">
+            Register as User
+          </button>
+
+          <p>Already registered?</p>
+          <a href="{{ url_for('login') }}">Login</a>
+        </form>
+
+        <!-- HOSPITAL REGISTRATION -->
+        <form id="hospitalForm" class="auth-form">
+          <h2>Hospital Registration</h2>
+          <p class="form-subtitle">Secure access for verified hospitals.</p>
+
+          <div class="input-group">
+            <label for="h_email">Official Email</label>
+            <input type="email" id="h_email" placeholder="hospital@lifelink.com" required />
+          </div>
+
+          <div class="input-group">
+            <label for="h_pass">Password</label>
+            <input type="password" id="h_pass" placeholder="••••••••" required />
+          </div>
+
+          <div class="input-group">
+            <label for="h_code">Hospital Name</label>
+            <input type="text" id="h_code" placeholder="Hospital XYZ" required />
+          </div>
+
+          
+
+          <button id="hospitalLoginBtn" class="btn primary-btn hosp-color">
+            Register as Hospital
+          </button>
+
+          <p>Already registered?</p>
+          <a href="{{ url_for('login') }}">Login</a>
+        </form>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='registration.js') }}"></script>
+  <script src="{{ url_for('static', filename='global.js') }}"></script>
+</body>
+</html>

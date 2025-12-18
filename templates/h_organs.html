@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LifeLink · Organs Available (Hospital Input)</title>
+
+  <!-- Global CSS uploaded by you -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='h_global2.css') }}">
+
+  <style>
+    /* small page-specific overrides */
+    main { padding: 1.2rem; }
+    .page-grid { display: grid; gap: 1rem; grid-template-columns: 420px 1fr; }
+    .form-panel { padding: 1rem; }
+    .list-panel { padding: 1rem; max-height: 70vh; overflow:auto; }
+    label { display:block; font-weight:600; margin:0.5rem 0 0.25rem; }
+    input[type=text], textarea, select { width:100%; padding:0.6rem; border-radius:10px; border:1px solid rgba(0,0,0,0.06); }
+    .organs-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.5rem; }
+    .save-row { display:flex; gap:0.6rem; align-items:center; margin-top:0.8rem; }
+    .toast { position: fixed; right: 1.2rem; bottom: 1.2rem; background: #001aff; color:white; padding:0.8rem 1rem; border-radius:12px; display:none; }
+    .toast.show { display:block; }
+    #map { width:100%; height:320px; border-radius:12px; background:#f1f1f1; display:flex; align-items:center; justify-content:center; color:#666; }
+    .filters { display:flex; gap:0.6rem; flex-wrap:wrap; }
+    .filter-pill { padding:0.35rem 0.6rem; border-radius:999px; border:1px solid rgba(0,0,0,0.06); }
+    .saved-item { padding:0.7rem; border-radius:12px; margin-bottom:0.6rem; background:rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.04); }
+  
+.page-grid {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.right-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+
+.list-panel {
+  grid-column: 2;
+  grid-row: 1;
+  padding: 1rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+
+
+    
+  </style>
+</head>
+<div class="sidebar-backdrop"></div>
+
+  <div class="layout page-root">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass">
+      <!-- (Removed sidebar-close button so only one X exists: the MENU button morph) -->
+
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">LIFELINK</div>
+      </div>
+
+      <!-- Sidebar menu links -->
+     <nav class="sidebar-links">
+        <a href="{{ url_for('h_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('hblood') }}">Blood database</a>
+        <a href = "{{url_for('horgan')}}" class="active">Organ Database</a>
+        <a href="{{ url_for('drugi') }}">Drug-inventory</a>
+        <a href="{{ url_for('happointment') }}">Appointemts database</a>
+        <a href="{{ url_for('nurse') }}">Nurse Schedular</a>
+        <a href="{{ url_for('ambulance') }}">Ambulance</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        User Panel · LifeLink
+      </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="layout-main">
+      <!-- NAVBAR -->
+      <header class="navbar glass">
+        <div class="navbar-left">
+          <div class="logo-dot"></div>
+          <span class="logo-text">LIFELINK</span>
+        </div>
+
+        <!-- Top nav links (desktop; hidden on mobile by your CSS) -->
+        <nav class="navbar-links">
+          <a href="{{ url_for('h_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('hblood') }}">Blood database</a>
+        <a href = "{{url_for('horgan')}}" class="active">Organ Database</a>
+        <a href="{{ url_for('drugi') }}">Drug-inventory</a>
+        <a href="{{ url_for('happointment') }}">Appointemts database</a>
+        <a href="{{ url_for('nurse') }}">Nurse Schedular</a>
+        <a href="{{ url_for('ambulance') }}">Ambulance</a>
+        </nav>
+
+        <!-- MENU button on right (hamburger → X handled by CSS + JS) -->
+        <button type="button" class="sidebar-toggle" aria-label="Toggle sidebar">
+          <span class="bar"></span>
+          <span class="label"></span>
+        </button>
+      </header>
+
+  <script>
+    // NAVBAR–SIDEBAR CONNECTION
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.querySelector('.sidebar-toggle');
+    let sidebarOpen = false;
+
+    toggleBtn.addEventListener('click', () => {
+      sidebarOpen = !sidebarOpen;
+      sidebar.style.left = sidebarOpen ? '0' : '-260px';
+    });
+
+    // Close sidebar on outside click
+    document.addEventListener('click', (e) => {
+      if (sidebarOpen && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+        sidebarOpen = false;
+        sidebar.style.left = '-260px';
+      }
+    });
+  </script>
+
+  <main class="section reveal">
+    <h2>Organs Available </h2>
+    <p class="section-sub">Update and check the availability of organs ready to be operated on</p>
+
+    <div class="page-grid">
+      <section class="form-panel glass">
+        <h3>Hospital Info</h3>
+        <label>Hospital Name</label>
+        <input id="h_name" type="text" placeholder="e.g. St. Mercy Hospital" />
+
+        <label>Hospital Address</label>
+        <input type="text" id="h_address" rows="2" placeholder="Street, City, State">
+
+        <label>Organs (select one or more)</label>
+        <div class="organs-grid" id="organsCheckboxes">
+          <label><input type="checkbox" value="Heart"> Heart</label>
+          <label><input type="checkbox" value="Liver"> Liver</label>
+          <label><input type="checkbox" value="Kidney"> Kidney</label>
+          <label><input type="checkbox" value="Lung"> Lung</label>
+          <label><input type="checkbox" value="Pancreas"> Pancreas</label>
+          <label><input type="checkbox" value="Cornea"> Cornea</label>
+        </div>
+
+        <label>Blood Type</label>
+        <select id="bloodType">
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+        </select>
+
+        <div style="display:flex;gap:0.6rem;margin-top:0.5rem;">
+          <div style="flex:1;">
+            <label>Smoking</label>
+            <select id="smoking"><option>No</option><option>Yes</option></select>
+          </div>
+          <div style="flex:1;">
+            <label>Drinking</label>
+            <select id="drinking"><option>No</option><option>Yes</option></select>
+          </div>
+        </div>
+
+        <label>Chronic Diseases (comma separated)</label>
+        <input id="chronic" type="text" placeholder="e.g. diabetes, hypertension" />
+
+        <!-- two extra filters requested -->
+        <div style="display:flex;gap:0.6rem;margin-top:0.5rem;">
+          <div style="flex:1;">
+            <label>Age Group</label>
+            <select id="ageGroup"><option>0-18</option><option>19-40</option><option>41-65</option><option>65+</option></select>
+          </div>
+          <div style="flex:1;">
+            <label>Urgency</label>
+            <select id="urgency"><option>Routine</option><option>Urgent</option><option>Immediate</option></select>
+          </div>
+        </div>
+
+        <div class="save-row">
+          <button id="saveBtn" class="btn primary">Save to Database</button>
+          <button id="clearBtn" class="btn ghost">Clear Form</button>
+        </div>
+
+       
+      </section>
+<div class="right-stack">
+
+    <aside class="list-panel glass">
+        <h3>Hospital Organ Database (Saved entries)</h3>
+
+        <div class="filters" style="margin-bottom:0.6rem">
+
+          <div class="filter-pill">
+            Search:
+            <input id="searchBox" placeholder="hospital or organ"
+              style="border:none;background:transparent;outline:none;" />
+          </div>
+        </div>
+
+        <div id="savedList"></div>
+    </aside>
+
+
+
+
+</div>
+
+
+    </div>
+  </main>
+
+  <div id="toast" class="toast">Saved — data stored successfully</div>
+
+  <!-- Global JS uploaded by you -->
+   <script src="{{ url_for('static', filename='h_organ.js') }}"></script>
+  <script src="{{ url_for('static', filename='h_global.js') }}"></script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const saveBtn = document.getElementById("saveBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const toast = document.getElementById("toast");
+    const savedList = document.getElementById("savedList");
+    const searchBox = document.getElementById("searchBox");
+
+    let organDB = []; // DATA COMING FROM FIREBASE ONLY
+
+    function toastMsg(msg) {
+        toast.textContent = msg;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2000);
+    }
+
+    // Get selected organs
+    function getCheckedOrgans() {
+        return Array.from(
+            document.querySelectorAll('#organsCheckboxes input[type=checkbox]:checked')
+        ).map(x => x.value);
+    }
+
+    // Clear form inputs
+    function clearForm() {
+        document.getElementById("h_name").value = "";
+        document.getElementById("h_address").value = "";
+        document.getElementById("chronic").value = "";
+        document.querySelectorAll('#organsCheckboxes input[type=checkbox]').forEach(x => x.checked = false);
+    }
+
+    // SAVE TO FIREBASE
+    async function saveEntry() {
+
+        const hospitalName = document.getElementById("h_name").value.trim();
+        const address = document.getElementById("h_address").value.trim();
+        const organs = getCheckedOrgans();
+        const blood = document.getElementById("bloodType").value;
+        const smoking = document.getElementById("smoking").value;
+        const drinking = document.getElementById("drinking").value;
+        const chronic = document.getElementById("chronic").value;
+        const ageGroup = document.getElementById("ageGroup").value;
+        const urgency = document.getElementById("urgency").value;
+
+        if (!hospitalName || organs.length === 0) {
+            alert("Please provide hospital name and at least one organ.");
+            return;
+        }
+
+        const payload = {
+            hospitalName,
+            address,
+            organs,
+            blood,
+            smoking,
+            drinking,
+            chronic,
+            ageGroup,
+            urgency
+        };
+
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
+
+        try {
+            const res = await fetch("/api/save_organ", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (data.status !== "success") {
+                toastMsg("Save failed");
+                saveBtn.disabled = false;
+                saveBtn.textContent = "Save to Database";
+                return;
+            }
+
+            toastMsg("Saved!");
+            await loadEntries(); // reload from Firebase
+            clearForm();
+
+        } catch (err) {
+            console.error(err);
+            toastMsg("Error saving");
+        }
+
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save to Database";
+    }
+
+    // LOAD DATA FROM FIREBASE
+    async function loadEntries() {
+        try {
+            const res = await fetch("/api/get_organs_by_hospital");
+            const data = await res.json();
+
+            organDB = data.organ_results || [];
+            renderList();
+
+        } catch (err) {
+            console.error("LOAD ERROR:", err);
+        }
+    }
+
+    // Render entries into right panel
+    function renderList() {
+        const search = searchBox.value.trim().toLowerCase();
+
+        let filtered = organDB.filter(item => {
+            const hay = (item.hospitalName + " " + item.organs.join(" ")).toLowerCase();
+            return hay.includes(search);
+        });
+
+        savedList.innerHTML = "";
+
+        if (filtered.length === 0) {
+            savedList.innerHTML = "<div style='color:gray'>No entries saved yet.</div>";
+            return;
+        }
+
+        filtered.forEach(e => {
+            const div = document.createElement("div");
+            div.className = "saved-item";
+            div.innerHTML = `
+                <strong>${e.hospitalName}</strong>
+                <div style="font-size:0.9rem;color:gray">${e.address || ""}</div>
+                <div style="margin-top:0.5rem">Organs: <b>${e.organs.join(", ")}</b></div>
+                <div style="margin-top:0.3rem;font-size:0.85rem;color:gray">
+                    Blood: ${e.blood} • Age: ${e.ageGroup} • Smoking: ${e.smoking} • Drinking: ${e.drinking}
+                </div>
+                <div style="margin-top:0.3rem">Urgency: <b>${e.urgency}</b></div>
+            `;
+            savedList.appendChild(div);
+        });
+    }
+
+    // Event listeners
+    saveBtn.addEventListener("click", saveEntry);
+    clearBtn.addEventListener("click", clearForm);
+    searchBox.addEventListener("input", renderList);
+
+    // INITIAL LOAD
+    loadEntries();
+});
+</script>
+
+</body>
+</html>

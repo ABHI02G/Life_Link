@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Blood Database | LifeLink</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Global styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+
+  <style>
+    /* ------------ PAGE-SPECIFIC STYLES (Blood Database) ------------ */
+
+    .blood-section-header h2 {
+      margin-bottom: 0.3rem;
+    }
+
+    .blood-section-header p {
+      font-size: 0.9rem;
+      max-width: 640px;
+    }
+
+    /* Grid layout for the two big cards */
+    .blood-grid {
+      display: grid;
+      gap: 1.6rem;
+      align-items: stretch; /* both cards same height vertically */
+    }
+
+    @media (min-width: 960px) {
+      .blood-grid {
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+        align-items: stretch;
+      }
+    }
+
+    /* Bigger cards with full height to reduce white space */
+    .blood-card {
+      padding: 2rem 1.7rem;
+      height: 100%;
+    }
+
+    .blood-card h3 {
+      margin-bottom: 0.4rem;
+      font-size: 1.1rem;
+    }
+
+    .blood-card p {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      margin-bottom: 0.7rem;
+    }
+
+    .blood-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      align-items: flex-end;
+      margin-top: 0.4rem;
+    }
+
+    .blood-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 150px;
+    }
+
+    .blood-form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .blood-form-group select {
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      padding: 0.55rem 0.9rem;
+      font-size: 0.86rem;
+      outline: none;
+      background: #fff;
+    }
+
+    .blood-form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-soft);
+    }
+
+    .blood-info-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 0.7rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .blood-info-row span strong {
+      color: var(--primary-dark);
+    }
+
+    .blood-results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .blood-results-header h3 {
+      font-size: 1rem;
+    }
+
+    .blood-results-header span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .blood-table-wrapper {
+      margin-top: 0.3rem;
+      border-radius: 12px;
+      overflow: auto;
+      max-height: 520px; /* more vertical space for rows */
+      border: 1px solid rgba(255, 167, 190, 0.35);
+    }
+
+    table.blood-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      min-width: 620px;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(12px);
+    }
+
+    .blood-table thead {
+      position: sticky;
+      top: 0;
+      background: #fff6fb;
+      z-index: 1;
+    }
+
+    .blood-table th,
+    .blood-table td {
+      padding: 0.6rem 0.7rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 167, 190, 0.4);
+    }
+
+    .blood-table th {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .blood-table tbody tr:hover {
+      background: rgba(255, 248, 252, 0.9);
+    }
+
+    .blood-table td small {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .btn-map {
+      font-size: 0.78rem;
+      padding: 0.45rem 0.9rem;
+      white-space: nowrap;
+    }
+
+    /* Map block */
+    .blood-map {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      height: 100%;
+    }
+
+    .blood-map p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .blood-map-frame {
+      flex: 1;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--glass-border);
+      height: 100%;
+    }
+
+    .blood-map-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /* Sticky full-height map on the right (desktop) */
+    @media (min-width: 960px) {
+      .blood-map-card {
+        position: sticky;
+        top: 6.5rem; /* below navbar */
+        height: calc(100vh - 8rem); /* almost full viewport */
+        align-self: flex-start;
+      }
+    }
+
+    /* Slightly reduce extra white at bottom */
+    main {
+      padding-bottom: 0;
+    }
+    .section {
+      padding-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background animation -->
+  <div class="background-pulse">
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+  </div>
+
+  <!-- Sidebar backdrop (overlay) -->
+  <div class="sidebar-backdrop"></div>
+
+  <div class="layout page-root">
+    <!-- SIDEBAR (same as dashboard) -->
+    <aside class="sidebar glass">
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">LIFELINK</div>
+      </div>
+
+      <!-- Sidebar menu links -->
+      <nav class="sidebar-links">
+       <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('blood') }}" class="active">Blood</a>
+
+          <!-- FIXED ORGAN LINK -->
+          <a href="{{ url_for('organ_database') }}">Organs</a>
+
+          <a href="{{ url_for('ai') }}">AI</a>
+          <a href="{{ url_for('rare_medicine') }}">Rare Medicine</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('appointment') }}">Appointment</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        User Panel · LifeLink
+      </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="layout-main">
+      <!-- NAVBAR (same as dashboard) -->
+      <header class="navbar glass">
+        <div class="navbar-left">
+          <div class="logo-dot"></div>
+          <span class="logo-text">LIFELINK</span>
+        </div>
+
+        <!-- Top nav links (desktop) -->
+        <nav class="navbar-links">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('blood') }}" class="active">Blood</a>
+
+          <!-- FIXED ORGAN LINK -->
+          <a href="{{ url_for('organ_database') }}">Organs</a>
+
+          <a href="{{ url_for('ai') }}">AI</a>
+          <a href="{{ url_for('rare_medicine') }}">Rare Medicine</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('appointment') }}">Appointment</a>
+        </nav>
+
+        <!-- MENU button on right -->
+        <button type="button" class="sidebar-toggle" aria-label="Toggle sidebar">
+          <span class="bar"></span>
+          <span class="label"></span>
+        </button>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main>
+        <section class="section">
+          <div class="section-header blood-section-header">
+            <h2>Blood Database</h2>
+            <p>
+              Enter the <strong>user blood group</strong> and get output with
+              blood group, hospital name, phone number, address, units available and live map.
+            </p>
+          </div>
+
+          <div class="blood-grid">
+            <!-- LEFT COLUMN: Input + Table -->
+            <div class="glass info-card tilt-card blood-card">
+              <h3>Search by blood group</h3>
+              <p>
+                Choose the required group to see connected hospitals / blood banks
+                that currently handle that type.
+              </p>
+
+              <form class="blood-form" id="bloodForm">
+                <div class="blood-form-group">
+                  <label for="bloodGroup">User blood group</label>
+                  <select id="bloodGroup" name="bloodGroup" required>
+                    <option value="A+">A Positive (A+)</option>
+                    <option value="A-">A Negative (A-)</option>
+                    <option value="B+">B Positive (B+)</option>
+                    <option value="B-">B Negative (B-)</option>
+                    <option value="O+">O Positive (O+)</option>
+                    <option value="O-">O Negative (O-)</option>
+                    <option value="AB+">AB Positive (AB+)</option>
+                    <option value="AB-">AB Negative (AB-)</option>
+                  </select>
+                </div>
+
+                <button class="btn primary" type="submit">
+                  Search availability
+                </button>
+              </form>
+
+              <div class="blood-info-row">
+                <span>
+                  <strong>Output fields:</strong>
+                  Blood group, hospital name, <strong>units available</strong>, phone number, address, map.
+                </span>
+              </div>
+
+              <div class="blood-results" style="margin-top: 1rem;">
+                <div class="blood-results-header">
+                  <h3>Matching hospitals</h3>
+                  <span id="resultsCount">0 hospitals found</span>
+                </div>
+
+                <div class="blood-table-wrapper">
+                  <table class="blood-table" aria-describedby="resultsCount">
+                    <thead>
+                      <tr>
+                        <th>Blood group</th>
+                        <th>Hospital name</th>
+                        <th>Units</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Map</th>
+                      </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                      <!-- Filled by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Map (sticky full height on desktop) -->
+            <div class="glass info-card tilt-card blood-card blood-map blood-map-card">
+              <h3>Hospital Map</h3>
+              <p id="mapDescription">
+                Tap “View” in the table to focus the map on a specific hospital.
+              </p>
+              <div class="blood-map-frame">
+                <iframe
+                  id="mapFrame"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  src="https://www.google.com/maps?q=blood+bank+near+me&output=embed"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          © 2025 LifeLink · Blood Database
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- Emergency Button -->
+  <button id="emergencyBtn" class="emergency-btn">
+    <span class="emergency-dot"></span>
+    Emergency
+  </button>
+
+  <!-- Emergency Toast -->
+<div id="emergencyToast" class="emergency-toast">
+  <div class="glass toast-content">
+    <h3>⚠ Emergency Request</h3>
+
+    <p style="color:#d00;font-weight:600;">
+      Warning: This will notify nearby hospitals & ambulance services.
+    </p>
+
+    <label>Type of Accident:</label>
+    <select id="accType" class="input">
+      <option value="road-accident">Road Accident</option>
+      <option value="fire">Fire Accident</option>
+      <option value="medical">Medical Emergency</option>
+      <option value="cardiac">Cardiac Arrest</option>
+      <option value="other">Other</option>
+    </select>
+
+    <label>Additional Notes (optional):</label>
+    <textarea id="accNotes" class="input"></textarea>
+
+    <button id="sendSOS" class="btn primary" style="width:100%;margin-top:10px">
+      Activate SOS
+    </button>
+
+    <button id="closeToast" class="btn ghost" style="width:100%;margin-top:10px">
+      Cancel
+    </button>
+  </div>
+</div>
+
+
+  <!-- Global JS (sidebar toggle + emergency logic) -->
+<script src="{{ url_for('static', filename='global.js') }}"></script>
+
+  <!-- Page-specific JS -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const bloodForm = document.getElementById("bloodForm");
+      const bloodGroupInput = document.getElementById("bloodGroup");
+      const resultsBody = document.getElementById("resultsBody");
+      const resultsCount = document.getElementById("resultsCount");
+      const mapFrame = document.getElementById("mapFrame");
+      const mapDescription = document.getElementById("mapDescription");
+
+      // "Database" with units available per hospital
+      const bloodDatabase = [
+        {
+          bloodGroup: "A+",
+          hospital: "City Care Multispeciality Hospital",
+          phone: "+91-98765-10001",
+          address: "12 Ring Road, Central Layout, Bengaluru",
+          mapQuery: "City Care Multispeciality Hospital, Bengaluru",
+          units: 14,
+        },
+        {
+          bloodGroup: "A+",
+          hospital: "LifeLink Blood Center",
+          phone: "+91-98765-10002",
+          address: "2nd Cross, MG Road, Bengaluru",
+          mapQuery: "LifeLink Blood Center, MG Road, Bengaluru",
+          units: 9,
+        },
+        {
+          bloodGroup: "B+",
+          hospital: "St. Jude Medical & Blood Bank",
+          phone: "+91-98765-20001",
+          address: "Old Airport Road, Bengaluru",
+          mapQuery: "St Jude Medical Blood Bank, Bengaluru",
+          units: 11,
+        },
+        {
+          bloodGroup: "O+",
+          hospital: "Elite Heart & Trauma Care",
+          phone: "+91-98765-30001",
+          address: "NH-44, Outer Ring, Hyderabad",
+          mapQuery: "Elite Heart and Trauma Care, Hyderabad",
+          units: 7,
+        },
+        {
+          bloodGroup: "AB+",
+          hospital: "Metro City Super Speciality Hospital",
+          phone: "+91-98765-40001",
+          address: "Near Metro Station, Chennai",
+          mapQuery: "Metro City Super Speciality Hospital, Chennai",
+          units: 5,
+        },
+        {
+          bloodGroup: "O-",
+          hospital: "RedCross Regional Blood Bank",
+          phone: "+91-98765-50001",
+          address: "Civil Lines, Mysuru",
+          mapQuery: "Red Cross Blood Bank, Mysuru",
+          units: 4,
+        },
+        {
+          bloodGroup: "B-",
+          hospital: "HopeLife Emergency & Trauma",
+          phone: "+91-98765-60001",
+          address: "GT Road, Coimbatore",
+          mapQuery: "HopeLife Emergency and Trauma, Coimbatore",
+          units: 6,
+        },
+        {
+          bloodGroup: "AB-",
+          hospital: "National Institute Hospital & Blood Center",
+          phone: "+91-98765-70001",
+          address: "Science Park, Mumbai",
+          mapQuery: "National Institute Hospital Blood Center, Mumbai",
+          units: 3,
+        },
+      ];
+
+      function updateMap(mapQuery, hospitalName) {
+        if (!mapQuery) {
+          mapFrame.src =
+            "https://www.google.com/maps?q=blood+bank+near+me&output=embed";
+          mapDescription.textContent =
+            "No precise location selected. Showing blood banks near you.";
+          return;
+        }
+
+        const encoded = encodeURIComponent(mapQuery);
+        mapFrame.src = "https://www.google.com/maps?q=" + encoded + "&output=embed";
+        mapDescription.textContent =
+          "Map centered on: " + hospitalName + " (" + mapQuery + ")";
+      }
+
+      function renderResults(group) {
+        const matches = bloodDatabase.filter(
+          (item) => item.bloodGroup === group
+        );
+
+        resultsBody.innerHTML = "";
+
+        if (!matches.length) {
+          resultsBody.innerHTML =
+            '<tr><td colspan="6">No hospitals found for <strong>' +
+            group +
+            "</strong> in the local database. Try contacting the nearest emergency helpline.</td></tr>";
+          resultsCount.textContent = "0 hospitals found";
+          updateMap(null, null);
+          return;
+        }
+
+        matches.forEach((item) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" +
+            item.bloodGroup +
+            "</td>" +
+            "<td>" +
+            item.hospital +
+            "</td>" +
+            "<td><strong>" +
+            item.units +
+            "</strong> units</td>" +
+            '<td><span>' +
+            item.phone +
+            "</span><br /><small>Tap to call from mobile</small></td>" +
+            "<td>" +
+            item.address +
+            "</td>" +
+            '<td><button type="button" class="btn ghost btn-map" data-map="' +
+            item.mapQuery.replace(/\"/g, "&quot;") +
+            '" data-hospital="' +
+            item.hospital.replace(/\"/g, "&quot;") +
+            '">View</button></td>';
+
+          resultsBody.appendChild(tr);
+        });
+
+        resultsCount.textContent =
+          matches.length +
+          " hospital" +
+          (matches.length > 1 ? "s" : "") +
+          " found";
+
+        const mapButtons = resultsBody.querySelectorAll(".btn-map");
+        mapButtons.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const mapQuery = this.getAttribute("data-map");
+            const hospitalName = this.getAttribute("data-hospital");
+            updateMap(mapQuery, hospitalName);
+          });
+        });
+
+        // Auto-focus first result
+        const first = matches[0];
+        if (first) {
+          updateMap(first.mapQuery, first.hospital);
+        }
+      }
+
+      bloodForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const group = bloodGroupInput.value;
+        renderResults(group);
+      });
+
+      // Initial render with default select value
+      renderResults(bloodGroupInput.value);
+    });
+  </script>
+<!-- Global JS -->
+<script src="{{ url_for('static', filename='global.js') }}"></script>
+
+<!-- New user-side blood fetcher -->
+<script src="{{ url_for('static', filename='blood.js') }}"></script>
+
+</body>
+</html>

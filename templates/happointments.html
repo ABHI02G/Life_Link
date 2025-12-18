@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Hospital — Appointments</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='h_global2.css') }}">
+
+  <style>
+    /* Clean hospital appointments UI — matches other pages */
+    :root {
+      --gap: 1rem;
+      --card-radius: 12px;
+      --card-padding: 16px;
+    }
+
+    main { padding: 2rem; }
+
+    .page-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 1.4rem;
+      align-items: start;
+    }
+
+    @media (max-width: 980px) {
+      .page-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--glass-bg);
+      border-radius: var(--card-radius);
+      padding: var(--card-padding);
+      box-shadow: 0 6px 18px rgba(14,78,136,0.04);
+    }
+
+    .form .row { display: grid; gap: 0.6rem; margin-bottom: 0.9rem; }
+    .form label { display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:0.35rem; }
+    .form input[type="text"], .form input[type="tel"], .form input[type="date"], .form input[type="time"], .form select, .form textarea {
+      width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--glass-border); background:#fff;
+      font-size:0.95rem;
+    }
+    .form textarea { min-height:78px; resize:vertical; }
+
+    .btn-row { display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.6rem; }
+    .btn-row .btn { padding:8px 12px; border-radius:10px; }
+
+    .search-row { display:flex; gap:0.6rem; align-items:center; margin-bottom:0.8rem; }
+    .search-row input { flex:1; padding:10px 12px; border-radius:10px; border:1px solid var(--glass-border); }
+
+    .table-wrap { overflow:auto; border-radius:12px; border:1px solid rgba(0,0,0,0.04); background:transparent; }
+    table { width:100%; border-collapse:collapse; min-width:720px; }
+    th, td { padding:10px 12px; text-align:left; border-bottom:1px solid rgba(0,0,0,0.04); vertical-align:middle; font-size:0.92rem; }
+    th { color:var(--text-muted); font-size:0.85rem; background:rgba(0,0,0,0.01); font-weight:600; }
+    .muted { color:var(--text-muted); font-size:0.86rem; }
+
+    .actions { display:flex; gap:0.45rem; flex-wrap:wrap; }
+    .pill { display:inline-flex; align-items:center; gap:0.4rem; padding:6px 10px; border-radius:999px; background:rgba(0,0,0,0.03); font-size:0.85rem; }
+
+    /* responsive tweaks */
+    @media (max-width:720px) {
+      table { font-size:0.86rem; }
+      th:nth-child(1), td:nth-child(1) { display:none; } /* hide index on tiny screens */
+    }
+
+    /* small header */
+    .section-header { margin-bottom:1rem; }
+    .section-header h2 { margin:0 0 6px 0; }
+    .section-header p { margin:0; color:var(--text-muted); font-size:0.95rem; }
+  </style>
+</head>
+<body>
+  <div class="layout page-root">
+    <aside class="sidebar glass">
+      <div class="sidebar-logo"><div class="logo-dot"></div><div class="logo-text">HOSPITAL</div></div>
+      <nav class="sidebar-links">
+        <a href="{{ url_for('h_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('hblood') }}">Blood database</a>
+        <a href = "{{url_for('horgan')}}">Organ Database</a>
+        <a href="{{ url_for('drugi') }}">Drug-inventory</a>
+        <a href="{{ url_for('happointment') }}" class="active">Appointemts database</a>
+        <a href="{{ url_for('nurse') }}">Nurse Schedular</a>
+        <a href="{{ url_for('ambulance') }}">Ambulance</a
+      </nav>
+      <div class="sidebar-footer">Hospital · LifeLink</div>
+    </aside>
+
+    <div class="layout-main">
+      <header class="navbar glass">
+        <div class="navbar-left"><div class="logo-dot"></div><div class="logo-text">HOSPITAL PORTAL</div></div>
+        <nav class="navbar-links">
+          <a href="{{ url_for('h_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('hblood') }}">Blood database</a>
+        <a href = "{{url_for('horgan')}}">Organ Database</a>
+        <a href="{{ url_for('drugi') }}">Drug-inventory</a>
+        <a href="{{ url_for('happointment') }}" class="active">Appointemts database</a>
+        <a href="{{ url_for('nurse') }}">Nurse Schedular</a>
+        <a href="{{ url_for('ambulance') }}">Ambulance</a
+        </nav>
+        <button class="sidebar-toggle" aria-label="Toggle sidebar"><span class="bar"></span></button>
+      </header>
+
+      <main>
+        <section class="section">
+          <div class="section-header">
+            <h2>Hospital — Appointments</h2>
+            <p class="subtext">Add, edit and manage appointments. This page shares the same appointment store as the main user appointments page so both UIs stay in sync.</p>
+          </div>
+
+          <div class="page-grid">
+            <!-- LEFT: Form -->
+            <div class="card form">
+              <form id="form">
+                <input type="hidden" id="id" />
+
+<div class="row">
+                  <label for="h_name">Hospital name</label>
+                  <input id="h_name" type="text" placeholder="Hospital Name" />
+                </div>
+
+                <div class="row">
+                  <label for="patient">Patient name</label>
+                  <input id="patient" type="text" placeholder="Full name" />
+                </div>
+
+                <div class="row">
+                  <label for="phone">Phone</label>
+                  <input id="phone" type="tel" placeholder="+91 9xxxxxxxxx" />
+                </div>
+
+                <div class="row">
+                  <label for="doctor">Doctor</label>
+                  <input id="doctor" type="text" placeholder="Dr. Name / Speciality" />
+                </div>
+
+                <div class="row">
+                  <label for="department">Department</label>
+                  <select id="department">
+                    <option value="">— choose —</option>
+                    <option>General Medicine</option>
+                    <option>Cardiology</option>
+                    <option>Orthopaedics</option>
+                    <option>ENT</option>
+                    <option>Dermatology</option>
+                    <option>Nephrology</option>
+                    <option>Ophthalmology</option>
+                  </select>
+                </div>
+
+                <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem">
+                  <div>
+                    <label for="date">Date</label>
+                    <input id="date" type="date" />
+                  </div>
+                  <div>
+                    <label for="time">Time</label>
+                    <input id="time" type="time" />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <label for="notes">Notes</label>
+                  <textarea id="notes" placeholder="Optional notes (symptoms, instructions...)"></textarea>
+                </div>
+
+                <div class="btn-row">
+                  <button class="btn primary" id="saveBtn" type="submit">Save appointment</button>
+                  <button type="button" class="btn ghost" id="resetBtn">Clear form</button>
+                  <button type="button" class="btn ghost" id="exportCsv">Export CSV</button>
+                  <button type="button" class="btn ghost" id="exportIcal">Export iCal (all)</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- RIGHT: Search + Table -->
+            <div>
+              <div class="card" style="margin-bottom:1rem;">
+                <div class="search-row">
+                  <input id="search" placeholder="Search patient, doctor, department or phone..." />
+                  <select id="filterDept">
+                    <option value="">All departments</option>
+                    <option>General Medicine</option>
+                    <option>Cardiology</option>
+                    <option>Orthopaedics</option>
+                    <option>ENT</option>
+                    <option>Dermatology</option>
+                    <option>Nephrology</option>
+                    <option>Ophthalmology</option>
+                  </select>
+                  <button id="clearFilters" class="btn ghost">Clear</button>
+                </div>
+                <div class="muted" style="margin-top:6px">Appointments are stored in <code>lifelink_appointments_v1</code> (shared).</div>
+              </div>
+
+              <div class="card table-card">
+                <div class="table-wrap">
+                  <table id="table">
+                    <thead>
+                      <tr>
+                        <th style="width:38px">#</th>
+                        <th>Patient</th>
+                        <th>Phone</th>
+                        <th>Doctor</th>
+                        <th>Dept</th>
+                        <th>When</th>
+                        <th>Notes</th>
+                        <th style="width:220px">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">© 2025 LifeLink · Hospital</footer>
+    </div>
+  </div>
+
+<script src="{{ url_for('static', filename='h_global.js') }}"></script>
+<!-- Firebase (required) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<!-- ========= FINAL HOSPITAL APPOINTMENTS FIREBASE SCRIPT ========= -->
+
+<script>
+/* ===========================================================
+   HOSPITAL APPOINTMENTS — CONNECTED TO FLASK API BACKEND
+   No Firebase client-side needed anymore.
+   Everything uses Flask → Pyrebase → Firebase.
+=========================================================== */
+
+const HOSPITAL_UID = "{{ session['uid'] }}"; // injected by Flask
+const API_BASE = "/api/hospital/appointments";
+
+const form = document.getElementById("form");
+const idEl = document.getElementById("id");
+const hNameEl = document.getElementById("h_name");
+const patientEl = document.getElementById("patient");
+const phoneEl = document.getElementById("phone");
+const doctorEl = document.getElementById("doctor");
+const deptEl = document.getElementById("department");
+const dateEl = document.getElementById("date");
+const timeEl = document.getElementById("time");
+const notesEl = document.getElementById("notes");
+
+const searchEl = document.getElementById("search");
+const filterDept = document.getElementById("filterDept");
+const clearFilters = document.getElementById("clearFilters");
+const tbody = document.querySelector("#table tbody");
+
+let appointments = []; // stored as [{id, data}]
+
+
+/* ===========================================================
+   Fetch appointments from backend
+=========================================================== */
+async function loadAppointments() {
+  const res = await fetch(`${API_BASE}/get`);
+  const json = await res.json();
+  const data = json.data || {};
+
+  appointments = Object.entries(data).map(([key, value]) => ({
+    key,
+    data: value
+  }));
+
+  render();
+}
+
+
+/* ===========================================================
+   Render into table
+=========================================================== */
+function render() {
+  const q = searchEl.value.trim().toLowerCase();
+  const deptF = filterDept.value;
+
+  const list = appointments
+    .map(a => ({ key: a.key, ui: convertUI(a.data) }))
+    .sort((a, b) => (a.ui.datetime || "").localeCompare(b.ui.datetime || ""));
+
+  const filtered = list.filter(({ ui }) => {
+    if (deptF && ui.department !== deptF) return false;
+    if (!q) return true;
+
+    return (
+      ui.patientName.toLowerCase().includes(q) ||
+      ui.phone.toLowerCase().includes(q) ||
+      ui.doctor.toLowerCase().includes(q) ||
+      ui.department.toLowerCase().includes(q)
+    );
+  });
+
+  tbody.innerHTML = "";
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="muted">No appointments found</td></tr>`;
+    return;
+  }
+
+  filtered.forEach(({ key, ui }, i) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${i + 1}</td>
+      <td><strong>${ui.patientName}</strong></td>
+      <td>${ui.phone}</td>
+      <td>${ui.doctor}</td>
+      <td>${ui.department}</td>
+      <td>${new Date(ui.datetime).toLocaleString()}</td>
+      <td>${ui.notes}</td>
+      <td>
+        <div class="actions">
+          <button class="btn ghost" data-edit="${key}">Edit</button>
+          <button class="btn ghost" data-del="${key}">Delete</button>
+        </div>
+      </td>`;
+    tbody.appendChild(row);
+  });
+}
+
+
+/* ===========================================================
+   Save / Update Appointment
+=========================================================== */
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const apptId = idEl.value;
+  const datetime = buildDateTime();
+
+  if (!datetime) return alert("Select date & time.");
+
+  const payload = {
+    hospitalName: hNameEl.value.trim(),
+    patientName: patientEl.value.trim(),
+    phone: phoneEl.value.trim(),
+    doctor: doctorEl.value.trim(),
+    department: deptEl.value,
+    datetime,
+    notes: notesEl.value.trim()
+  };
+
+  if (!payload.patientName) return alert("Patient name required.");
+
+  // create
+  if (!apptId) {
+    await fetch(`${API_BASE}/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } else {
+    // update
+    await fetch(`${API_BASE}/update/${apptId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  }
+
+  form.reset();
+  idEl.value = "";
+  loadAppointments();
+});
+
+
+/* ===========================================================
+   Build datetime
+=========================================================== */
+function buildDateTime() {
+  if (!dateEl.value || !timeEl.value) return null;
+  return new Date(`${dateEl.value}T${timeEl.value}`).toISOString();
+}
+
+
+/* ===========================================================
+   Convert record → UI model
+=========================================================== */
+function convertUI(d) {
+  const dt = d.datetime ? new Date(d.datetime) : null;
+
+  return {
+    patientName: d.patientName || "",
+    phone: d.phone || "",
+    doctor: d.doctor || "",
+    department: d.department || "",
+    notes: d.notes || "",
+    datetime: dt ? dt.toISOString() : ""
+  };
+}
+
+
+/* ===========================================================
+   Edit & Delete
+=========================================================== */
+tbody.addEventListener("click", async e => {
+  const editKey = e.target.dataset.edit;
+  const delKey = e.target.dataset.del;
+
+  // edit
+  if (editKey) {
+    const rec = appointments.find(a => a.key === editKey);
+    const d = rec.data;
+
+    idEl.value = editKey;
+    hNameEl.value = d.hospitalName || "";
+    patientEl.value = d.patientName || "";
+    phoneEl.value = d.phone || "";
+    doctorEl.value = d.doctor || "";
+    deptEl.value = d.department || "";
+
+    const dt = new Date(d.datetime);
+    dateEl.value = dt.toISOString().slice(0, 10);
+    timeEl.value = dt.toTimeString().slice(0, 5);
+
+    notesEl.value = d.notes || "";
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // delete
+  if (delKey) {
+    if (!confirm("Delete this appointment?")) return;
+
+    await fetch(`${API_BASE}/delete/${delKey}`, { method: "DELETE" });
+    loadAppointments();
+  }
+});
+
+
+/* ===========================================================
+   Filters
+=========================================================== */
+searchEl.addEventListener("input", render);
+filterDept.addEventListener("change", render);
+clearFilters.addEventListener("click", () => {
+  searchEl.value = "";
+  filterDept.value = "";
+  render();
+});
+
+
+/* ===========================================================
+   Init
+=========================================================== */
+loadAppointments();
+</script>
+
+
+<!-- ========= END OF FINAL HOSPITAL SCRIPT ========= -->
+
+<script src="{{ url_for('static', filename='h_appointments.js') }}"></script>
+
+
+<script src="{{ url_for('static', filename='h_appointments.js') }}"></script>
+
+  
+</body>
+</html>

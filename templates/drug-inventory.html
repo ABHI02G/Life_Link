@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Drug Inventory | LifeLink</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='h_global2.css') }}">
+</head>
+
+<div class="sidebar-backdrop"></div>
+
+  <div class="layout page-root">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass">
+      <!-- (Removed sidebar-close button so only one X exists: the MENU button morph) -->
+
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">LIFELINK</div>
+      </div>
+
+      <!-- Sidebar menu links -->
+      <nav class="sidebar-links">
+        <a href="{{ url_for('h_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('hblood') }}"  >Blood database</a>
+        <a href = "{{url_for('horgan')}}">Organ Database</a>
+        <a href="{{ url_for('drugi') }}" class="active">Drug-inventory</a>
+        <a href="{{ url_for('happointment') }}"  >Appointemts database</a>
+        <a href="{{ url_for('nurse') }}">Nurse Schedular</a>
+        <a href="{{ url_for('ambulance') }}">Ambulance</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        Hospital Panel · LifeLink
+      </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="layout-main">
+      <!-- NAVBAR -->
+      <header class="navbar glass">
+        <div class="navbar-left">
+          <div class="logo-dot"></div>
+          <span class="logo-text">LIFELINK</span>
+        </div>
+
+        <!-- Top nav links (desktop; hidden on mobile by your CSS) -->
+        <nav class="navbar-links">
+           <a href="{{ url_for('h_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('hblood') }}"  >Blood database</a>
+        <a href = "{{url_for('horgan')}}">Organ Database</a>
+        <a href="{{ url_for('drugi') }}" class="active">Drug-inventory</a>
+        <a href="{{ url_for('happointment') }}"  >Appointemts database</a>
+        <a href="{{ url_for('nurse') }}">Nurse Schedular</a>
+        <a href="{{ url_for('ambulance') }}">Ambulance</a>
+        </nav>
+
+        <!-- MENU button on right (hamburger → X handled by CSS + JS) -->
+        <button type="button" class="sidebar-toggle" aria-label="Toggle sidebar">
+          <span class="bar"></span>
+          <span class="label"></span>
+        </button>
+      </header>
+
+<body>
+
+  <h2>Drug Inventory
+
+
+  </h2>
+
+
+  <p class="section-sub">Check the availability of drugs in your hospital</p>
+
+<div class="page-root section reveal">
+
+  <!-- SEARCH BAR -->
+  <div class="glass" style="padding: 1rem; margin-bottom: 1.5rem;">
+    <input
+      id="searchBar"
+      type="text"
+      placeholder="Search medicines..."
+      class="glass"
+      style="width: 100%; padding: 0.8rem; border-radius: 12px; border: none; outline: none;"
+    >
+  </div>
+
+  <!-- TWO-COLUMN LAYOUT -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+
+    <!-- LEFT SIDE FORM -->
+    <div class="glass" style="padding: 1.4rem;">
+      <h3 style="margin-bottom: 1rem;">Add Medicine</h3>
+
+      <div style="display: grid; gap: 0.7rem;">
+        <input id="mName" type="text" placeholder="Medicine Name" class="glass" style="padding: 0.7rem; border-radius: 12px;">
+        <input id="mCompany" type="text" placeholder="Company" class="glass" style="padding: 0.7rem; border-radius: 12px;">
+        <input id="mDose" type="text" placeholder="Dosage (e.g., 500mg)" class="glass" style="padding: 0.7rem; border-radius: 12px;">
+        <input id="mAvail" type="number" placeholder="Availability (units)" class="glass" style="padding: 0.7rem; border-radius: 12px;">
+        <input id="mExpiry" type="date" class="glass" style="padding: 0.7rem; border-radius: 12px;">
+
+        <select id="mCategory" class="glass" style="padding: 0.7rem; border-radius: 12px;">
+          <option value="">Category</option>
+          <option>Tablet</option>
+          <option>Syrup</option>
+          <option>Injection</option>
+          <option>Ointment</option>
+        </select>
+
+        <button class="btn primary" onclick="addMedicine()">Save Medicine</button>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE TABLE -->
+  <!-- RIGHT SIDE TABLE -->
+<div class="glass" 
+     style="padding: 1rem; overflow-x: auto; height: 450px; overflow-y: auto;">
+
+  <h3 style="margin-bottom: 1rem;">Medicine Records</h3>
+
+  <table id="drugTable" style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead>
+      <tr style="font-weight: 600; border-bottom: 2px solid #bcd9ff;">
+        <th>Name</th>
+        <th>Company</th>
+        <th>Dosage</th>
+        <th>Availability</th>
+        <th>Expiry</th>
+        <th>Category</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="drugTableBody"></tbody>
+  </table>
+
+</div>
+
+  </div>
+</div>
+
+
+<!-- INLINE JS -->
+<script>
+
+// -----------------------------------------------
+// Firebase-BACKED DRUG INVENTORY (NO LOCALSTORAGE)
+// -----------------------------------------------
+
+let drugDB = {};      // Loaded from Firebase
+let editingIndex = null; // ID of drug being edited
+
+// Fetch all medicines from Firebase
+async function loadDrugs() {
+  const res = await fetch("/api/hospital/drugs/get");
+  const data = await res.json();
+
+  if (data.status === "success") {
+    drugDB = data.data || {};
+    renderTable();
+  }
+}
+
+// Add new medicine
+async function addMedicine() {
+  const name = mName.value.trim();
+  const company = mCompany.value.trim();
+  const dose = mDose.value.trim();
+  const avail = mAvail.value.trim();
+  const expiry = mExpiry.value;
+  const category = mCategory.value;
+
+  if (!name || !company || !dose || !avail || !expiry || !category) {
+    alert("Fill all fields.");
+    return;
+  }
+
+  const payload = { name, company, dose, avail, expiry, category };
+
+  const res = await fetch("/api/hospital/drugs/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  await loadDrugs();
+  clearInputs();
+}
+
+// Render Table
+function renderTable(filteredData = null) {
+  const tbody = document.getElementById("drugTableBody");
+  tbody.innerHTML = "";
+
+  const source = filteredData || drugDB;
+
+  Object.keys(source).forEach(id => {
+    const m = source[id];
+
+    tbody.innerHTML += `
+      <tr style="border-bottom: 1px solid #d0e4ff;">
+        <td>${m.name}</td>
+        <td>${m.company}</td>
+        <td>${m.dose}</td>
+        <td>${m.avail}</td>
+        <td>${m.expiry}</td>
+        <td>${m.category}</td>
+
+        <td style="display:flex; gap:6px;">
+          <button class="btn ghost" onclick="editRow('${id}')">Edit</button>
+          <button class="btn primary" style="padding:4px 10px; background:#e63946;" onclick="deleteRow('${id}')">X</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+// Delete medicine
+async function deleteRow(id) {
+  if (!confirm("Are you sure you want to delete this entry?")) return;
+
+  await fetch(`/api/hospital/drugs/delete/${id}`, {
+    method: "DELETE"
+  });
+
+  loadDrugs();
+}
+
+// Begin editing
+function editRow(id) {
+  const m = drugDB[id];
+  editingIndex = id;
+
+  mName.value = m.name;
+  mCompany.value = m.company;
+  mDose.value = m.dose;
+  mAvail.value = m.avail;
+  mExpiry.value = m.expiry;
+  mCategory.value = m.category;
+
+  document.querySelector("button.btn.primary").textContent = "Save Edit";
+  document.querySelector("button.btn.primary").onclick = saveEdit;
+}
+
+// Save edited medicine
+async function saveEdit() {
+  const payload = {
+    name: mName.value.trim(),
+    company: mCompany.value.trim(),
+    dose: mDose.value.trim(),
+    avail: mAvail.value.trim(),
+    expiry: mExpiry.value,
+    category: mCategory.value
+  };
+
+  await fetch(`/api/hospital/drugs/update/${editingIndex}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  document.querySelector("button.btn.primary").textContent = "Save Medicine";
+  document.querySelector("button.btn.primary").onclick = addMedicine;
+
+  clearInputs();
+  loadDrugs();
+}
+
+// Clear inputs
+function clearInputs() {
+  mName.value = "";
+  mCompany.value = "";
+  mDose.value = "";
+  mAvail.value = "";
+  mExpiry.value = "";
+  mCategory.value = "";
+}
+
+// Search logic
+document.getElementById("searchBar").addEventListener("input", function () {
+  const q = this.value.toLowerCase();
+  const filtered = {};
+
+  Object.keys(drugDB).forEach(id => {
+    const m = drugDB[id];
+
+    if (
+      m.name.toLowerCase().includes(q) ||
+      m.company.toLowerCase().includes(q)
+    ) {
+      filtered[id] = m;
+    }
+  });
+
+  renderTable(filtered);
+});
+
+// Initial load
+loadDrugs();
+
+</script>
+
+
+
+<script src="{{ url_for('static', filename='h_global.js') }}"></script>
+
+        <footer class="footer">
+          © 2025 LifeLink · Hospital Drug database
+        </footer>
+
+</body>
+</html>

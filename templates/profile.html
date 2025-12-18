@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Profile | LifeLink</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+
+  <style>
+    /* ---------- PAGE-SPECIFIC STYLES: PROFILE ---------- */
+
+    /* Stack cards one below the other on all screens */
+    .profile-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .profile-card {
+      padding: 1.8rem 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      .profile-card {
+        padding: 2rem 1.7rem;
+      }
+    }
+
+    .profile-header-block {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .profile-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffffff, #ffb3c6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: #5b0b2c;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+      flex-shrink: 0;
+    }
+
+    .profile-main-meta h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .profile-main-meta p {
+      margin: 0.1rem 0 0.3rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .profile-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+      font-size: 0.75rem;
+    }
+
+    .profile-tag {
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 167, 190, 0.65);
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .profile-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin-top: 1.2rem;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 640px) {
+      .profile-stats-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .profile-stat {
+      padding: 0.6rem 0.7rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 167, 190, 0.4);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .profile-stat span {
+      display: block;
+      color: var(--text-muted);
+      margin-bottom: 0.2rem;
+      font-size: 0.76rem;
+    }
+
+    .profile-stat strong {
+      font-size: 0.9rem;
+    }
+
+    /* Toggles / preferences */
+    .profile-toggle-row {
+      display: grid;
+      gap: 0.7rem;
+      margin-top: 1.1rem;
+      font-size: 0.8rem;
+    }
+
+    @media (min-width: 640px) {
+      .profile-toggle-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .profile-toggle {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.45rem;
+    }
+
+    .profile-toggle input[type="checkbox"] {
+      margin-top: 0.15rem;
+      width: 15px;
+      height: 15px;
+    }
+
+    .profile-toggle label {
+      cursor: pointer;
+    }
+
+    .profile-toggle label span {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    /* Form layout */
+    .profile-form-grid {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    @media (min-width: 640px) {
+      .profile-form-grid.two-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .profile-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .profile-form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .profile-form-group input,
+    .profile-form-group select,
+    .profile-form-group textarea {
+      border-radius: 12px;
+      padding: 0.7rem 0.9rem;
+      font-size: 0.86rem;
+      border: 1px solid var(--glass-border);
+      background: #ffffff;
+      outline: none;
+    }
+
+    .profile-form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .profile-form-group input:focus,
+    .profile-form-group select:focus,
+    .profile-form-group textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-soft);
+    }
+
+    .profile-actions {
+      margin-top: 1.2rem;
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .profile-actions-left {
+      margin-right: auto;
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .profile-subheading {
+      font-size: 0.9rem;
+      margin: 0.8rem 0 0.3rem;
+    }
+
+    .quick-links-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+    }
+
+    .btn.small-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.78rem;
+    }
+
+    /* Emergency card */
+    .emergency-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .emergency-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .profile-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.15rem 0.6rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-top: 0.3rem;
+      background: rgba(244, 67, 54, 0.08);
+      color: #b01911;
+      border: 1px solid rgba(244, 67, 54, 0.4);
+    }
+
+    .profile-badge-pill.small {
+      font-size: 0.7rem;
+    }
+
+    .profile-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    main {
+      padding-bottom: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background animation -->
+  <div class="background-pulse">
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+  </div>
+
+  <!-- Sidebar backdrop -->
+  <div class="sidebar-backdrop"></div>
+
+  <div class="layout page-root">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass">
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">LIFELINK</div>
+      </div>
+
+    <nav class="sidebar-links">
+         <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('blood') }}">Blood Database</a>
+
+        <!-- FIXED ORGAN LINK -->
+        <a href="{{ url_for('organ_database') }}">Organ Database</a>
+
+        <a href="{{ url_for('ai') }}">AI System</a>
+        <a href="{{ url_for('rare_medicine') }}">Rare Medicine &amp; Anti-venom</a>
+        <a href="{{ url_for('appointment') }}">Appointment</a>
+        <a href="{{ url_for('profile') }}">Profile</a>
+
+      <div class="sidebar-footer">
+        User Panel · LifeLink
+      </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="layout-main">
+      <!-- NAVBAR -->
+      <header class="navbar glass">
+        <div class="navbar-left">
+          <div class="logo-dot"></div>
+          <span class="logo-text">LIFELINK</span>
+        </div>
+
+         <nav class="navbar-links">
+          <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('blood') }}">Blood</a>
+
+          <!-- FIXED ORGAN LINK -->
+          <a href="{{ url_for('organ_database') }}">Organs</a>
+
+          <a href="{{ url_for('ai') }}">AI</a>
+          <a href="{{ url_for('rare_medicine') }}">Rare Medicine</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('appointment') }}">Appointment</a>
+        </nav>
+        </nav>
+
+        <button type="button" class="sidebar-toggle" aria-label="Toggle sidebar">
+          <span class="bar"></span>
+          <span class="label"></span>
+        </button>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main>
+        <section class="section">
+          <div class="section-header">
+            <h2>User Profile</h2>
+            <p>Manage your basic details, health information and emergency contacts for faster care.</p>
+          </div>
+
+          <div class="profile-grid">
+            <!-- Card 1: Overview + Emergency + Donor/Data Prefs + Connected data -->
+            <div class="glass info-card tilt-card profile-card">
+              <div class="profile-header-block">
+                <div class="profile-avatar" id="profileAvatar">
+                  U
+                </div>
+                <div class="profile-main-meta">
+                  <h3 id="profileNameDisplay">User Name</h3>
+                  <p id="profileSubline">Age · Blood group</p>
+                  <div class="profile-tags">
+                    <span class="profile-tag" id="profileRoleTag">Registered User</span>
+                    <span class="profile-tag">LifeLink ID: <span id="profileId">LL-0001</span></span>
+                  </div>
+                  <div class="profile-meta-row">
+                    <span id="profileUpdatedMeta">Not saved yet</span>
+                  </div>
+                  <!-- Connected data summary from other pages -->
+                  <div class="profile-meta-row" id="profileExternalRow1">
+                    <span id="profileRemindersSummary">AI reminders: —</span>
+                    <span id="profileVitalsSummary">Vitals: —</span>
+                  </div>
+                  <div class="profile-meta-row" id="profileExternalRow2">
+                    <span id="profileBloodSearchSummary">Blood DB: —</span>
+                    <span id="profileOrganSearchSummary">Organ DB: —</span>
+                    <span id="profileRareSummary">Rare Med: —</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="profile-stats-row">
+                <div class="profile-stat">
+                  <span>Blood group</span>
+                  <strong id="profileBloodDisplay">—</strong>
+                </div>
+                <div class="profile-stat">
+                  <span>Primary city</span>
+                  <strong id="profileCityDisplay">—</strong>
+                </div>
+                <div class="profile-stat">
+                  <span>Contact</span>
+                  <strong id="profilePhoneDisplay">—</strong>
+                </div>
+              </div>
+
+              <h4 class="profile-subheading" style="margin-top:1.1rem;">Donation & data preferences</h4>
+              <div class="profile-toggle-row">
+                <div class="profile-toggle">
+                  <input type="checkbox" id="prefBloodDonor" />
+                  <label for="prefBloodDonor">
+                    Willing to donate blood
+                    <span>Used to show you as a potential donor in emergency search.</span>
+                  </label>
+                </div>
+                <div class="profile-toggle">
+                  <input type="checkbox" id="prefOrganDonor" />
+                  <label for="prefOrganDonor">
+                    Willing to be organ donor
+                    <span>Flagged only according to local laws and hospital rules.</span>
+                  </label>
+                </div>
+                <div class="profile-toggle">
+                  <input type="checkbox" id="prefShareData" />
+                  <label for="prefShareData">
+                    Allow anonymized data for AI
+                    <span>Helps improve prediction models. No direct identity shared.</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="profile-badge-pill small" id="donorStatusPill" style="margin-top:0.9rem;">
+                Donor status: Not registered as blood or organ donor
+              </div>
+
+              <div class="emergency-card" style="margin-top: 1.3rem;">
+                <h3>Emergency contact</h3>
+                <p class="emergency-note">
+                  These details are shown to hospitals in emergency flows. Keep them updated.
+                </p>
+
+                <div class="profile-form-grid two-col">
+                  <div class="profile-form-group">
+                    <label for="emgName">Contact name</label>
+                    <input id="emgName" type="text" placeholder="e.g. Father / Mother / Guardian" />
+                  </div>
+                  <div class="profile-form-group">
+                    <label for="emgPhone">Phone</label>
+                    <input id="emgPhone" type="tel" placeholder="e.g. +91-98765-43210" />
+                  </div>
+                  <div class="profile-form-group">
+                    <label for="emgRelation">Relationship</label>
+                    <input id="emgRelation" type="text" placeholder="e.g. Father, Friend" />
+                  </div>
+                </div>
+
+                <div class="profile-badge-pill" id="emgStatus">
+                  ⚠ No emergency contact saved
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Details + Notifications + Download PDF + Clear data -->
+            <div class="glass info-card tilt-card profile-card">
+              <h3>Personal & Health details</h3>
+              <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:0.9rem;">
+                Only authorized medical staff can view this information during care or emergency.
+              </p>
+
+              <form id="profileForm">
+                <div class="profile-form-grid two-col">
+                  <div class="profile-form-group">
+                    <label for="fullName">Full name</label>
+                    <input id="fullName" type="text" placeholder="Your full name" />
+                  </div>
+
+                  <div class="profile-form-group">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" placeholder="you@example.com" />
+                  </div>
+
+                  <div class="profile-form-group">
+                    <label for="phone">Phone number</label>
+                    <input id="phone" type="tel" placeholder="+91-XXXXXXXXXX" />
+                  </div>
+
+                  <div class="profile-form-group">
+                    <label for="city">City</label>
+                    <input id="city" type="text" placeholder="e.g. Bengaluru" />
+                  </div>
+
+                  <div class="profile-form-group">
+                    <label for="dob">Date of birth</label>
+                    <input id="dob" type="date" />
+                  </div>
+
+                  <div class="profile-form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender">
+                      <option value="">Select</option>
+                      <option>Male</option>
+                      <option>Female</option>
+                      <option>Other / Prefer not</option>
+                    </select>
+                  </div>
+
+                  <div class="profile-form-group">
+                    <label for="bloodGroup">Blood group</label>
+                    <select id="bloodGroup">
+                      <option value="">Select</option>
+                      <option>A+</option>
+                      <option>A-</option>
+                      <option>B+</option>
+                      <option>B-</option>
+                      <option>O+</option>
+                      <option>O-</option>
+                      <option>AB+</option>
+                      <option>AB-</option>
+                    </select>
+                  </div>
+
+                  <div class="profile-form-group">
+                    <label for="userRole">User type</label>
+                    <select id="userRole">
+                      <option>General User</option>
+                      <option>Regular Donor</option>
+                      <option>High-risk Patient</option>
+                      <option>Healthcare Staff</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="profile-form-grid two-col" style="margin-top:1rem;">
+                  <div class="profile-form-group">
+                    <label for="preferredHospital">Preferred hospital</label>
+                    <input
+                      id="preferredHospital"
+                      type="text"
+                      placeholder="e.g. Manipal Hospital, Bengaluru"
+                    />
+                  </div>
+                  <div class="profile-form-group">
+                    <label for="healthId">Health ID / ABHA (optional)</label>
+                    <input
+                      id="healthId"
+                      type="text"
+                      placeholder="e.g. ABHA-XXXX-XXXX"
+                    />
+                  </div>
+                  <div class="profile-form-group">
+                    <label for="insuranceProvider">Insurance provider</label>
+                    <input
+                      id="insuranceProvider"
+                      type="text"
+                      placeholder="e.g. Star Health, Policy ID"
+                    />
+                  </div>
+                  <div class="profile-form-group">
+                    <label for="languagePref">Preferred language</label>
+                    <select id="languagePref">
+                      <option>English</option>
+                      <option>Hindi</option>
+                      <option>Kannada</option>
+                      <option>Tamil</option>
+                      <option>Telugu</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="profile-form-grid" style="margin-top:1rem;">
+                  <div class="profile-form-group">
+                    <label for="allergies">Allergies</label>
+                    <textarea
+                      id="allergies"
+                      placeholder="e.g. Penicillin, peanuts, dust..."
+                    ></textarea>
+                  </div>
+
+                  <div class="profile-form-group">
+                    <label for="conditions">Chronic conditions</label>
+                    <textarea
+                      id="conditions"
+                      placeholder="e.g. Diabetes, hypertension..."
+                    ></textarea>
+                  </div>
+
+                  <div class="profile-form-group">
+                    <label for="medications">Current medications</label>
+                    <textarea
+                      id="medications"
+                      placeholder="e.g. Metformin 500mg, Amlodipine 5mg..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <h4 class="profile-subheading">Notification & alerts</h4>
+                <div class="profile-toggle-row">
+                  <div class="profile-toggle">
+                    <input type="checkbox" id="prefEmailNotify" />
+                    <label for="prefEmailNotify">
+                      Email notifications
+                      <span>Non-urgent reminders, summaries and follow-up suggestions.</span>
+                    </label>
+                  </div>
+                  <div class="profile-toggle">
+                    <input type="checkbox" id="prefSmsNotify" />
+                    <label for="prefSmsNotify">
+                      SMS / WhatsApp alerts
+                      <span>Key reminders like medicines and appointments.</span>
+                    </label>
+                  </div>
+                  <div class="profile-toggle">
+                    <input type="checkbox" id="prefCriticalAlerts" />
+                    <label for="prefCriticalAlerts">
+                      Critical alerts only mode
+                      <span>Only send important alerts (emergency / critical health warnings).</span>
+                    </label>
+                  </div>
+                </div>
+
+                <h4 class="profile-subheading" style="margin-top:1rem;">Quick shortcuts</h4>
+                <div class="quick-links-row">
+                  <a href="blood-database.html" class="btn ghost small-btn">
+                    Open Blood Database
+                  </a>
+                  <a href="organ-database.html" class="btn ghost small-btn">
+                    Open Organ Database
+                  </a>
+                  <a href="ai-center.html" class="btn ghost small-btn">
+                    Open AI Health Assistant
+                  </a>
+                  <a href="rare-medicine.html" class="btn ghost small-btn">
+                    Open Rare Medicine Lookup
+                  </a>
+                </div>
+
+                <div class="profile-actions">
+                  <div class="profile-actions-left">
+                    <!-- Download as PDF / print dialog -->
+                    <button type="button" class="btn ghost" id="downloadPdfBtn">
+                      Download as PDF
+                    </button>
+                    <button type="button" class="btn ghost" id="clearAppDataBtn">
+                      Clear LifeLink local data
+                    </button>
+                  </div>
+                  <button type="button" class="btn ghost" id="resetProfileBtn">
+                    Reset
+                  </button>
+                  <button type="submit" class="btn primary">
+                    Save profile
+                  </button>
+                </div>
+
+                <p style="font-size:0.74rem; color:var(--text-muted); margin-top:0.6rem;">
+                  “Download as PDF” opens your browser's print dialog. Choose “Save as PDF” to export.
+                </p>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          © 2025 LifeLink · User Profile
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- Emergency Button -->
+  <button id="emergencyBtn" class="emergency-btn">
+    <span class="emergency-dot"></span>
+    Emergency
+  </button>
+
+  <!-- Emergency Toast -->
+  <div id="emergencyToast" class="emergency-toast">
+    <div class="glass toast-content">
+      <h3>Emergency Mode Activated</h3>
+      <p>
+        Configure this to trigger calls, SMS or alerts to your emergency response team
+        and nearby hospitals.
+      </p>
+      <button id="closeToast" class="btn ghost">Close</button>
+    </div>
+  </div>
+
+  <!-- Global JS (sidebar, emergency, etc.) -->
+  <script src="{{ url_for('static', filename='global.js') }}"></script>
+
+  <!-- Page-specific JS: LocalStorage for profile + PDF + connection to other pages -->
+<!-- Page-specific JS -->
+<script>
+/* ---------------------------------------------------------
+   CLOUD STORAGE HELPERS (Firebase through Flask API)
+------------------------------------------------------------*/
+
+// Load profile from Firebase via Flask API
+async function loadProfileFromFirebase() {
+  try {
+    const res = await fetch("/api/get_profile", {
+      method: "GET",
+      credentials: "same-origin",
+    });
+
+    const json = await res.json();
+    if (json.status === "success") return json.data;
+    return null;
+  } catch (e) {
+    console.warn("Error loading from Firebase:", e);
+    return null;
+  }
+}
+
+// Save profile to Firebase via Flask API
+async function saveProfileToFirebase(data) {
+  try {
+    const res = await fetch("/api/save_profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(data),
+    });
+
+    return await res.json();
+  } catch (e) {
+    console.warn("Error saving to Firebase:", e);
+    return { status: "error" };
+  }
+}
+
+/* ---------------------------------------------------------
+   PAGE MAIN SCRIPT
+------------------------------------------------------------*/
+
+document.addEventListener("DOMContentLoaded", function () {
+  // FORM ELEMENTS
+  const profileForm = document.getElementById("profileForm");
+  const resetProfileBtn = document.getElementById("resetProfileBtn");
+  const downloadPdfBtn = document.getElementById("downloadPdfBtn");
+  const clearAppDataBtn = document.getElementById("clearAppDataBtn");
+
+  // Inputs
+  const fullName = document.getElementById("fullName");
+  const email = document.getElementById("email");
+  const phone = document.getElementById("phone");
+  const city = document.getElementById("city");
+  const dob = document.getElementById("dob");
+  const gender = document.getElementById("gender");
+  const bloodGroup = document.getElementById("bloodGroup");
+  const userRole = document.getElementById("userRole");
+  const allergies = document.getElementById("allergies");
+  const conditions = document.getElementById("conditions");
+  const medications = document.getElementById("medications");
+  const preferredHospital = document.getElementById("preferredHospital");
+  const healthId = document.getElementById("healthId");
+  const insuranceProvider = document.getElementById("insuranceProvider");
+  const languagePref = document.getElementById("languagePref");
+
+  // Emergency
+  const emgName = document.getElementById("emgName");
+  const emgPhone = document.getElementById("emgPhone");
+  const emgRelation = document.getElementById("emgRelation");
+  const emgStatus = document.getElementById("emgStatus");
+
+  // Toggles
+  const prefBloodDonor = document.getElementById("prefBloodDonor");
+  const prefOrganDonor = document.getElementById("prefOrganDonor");
+  const prefShareData = document.getElementById("prefShareData");
+  const prefEmailNotify = document.getElementById("prefEmailNotify");
+  const prefSmsNotify = document.getElementById("prefSmsNotify");
+  const prefCriticalAlerts = document.getElementById("prefCriticalAlerts");
+
+  // Display elements
+  const avatar = document.getElementById("profileAvatar");
+  const nameDisplay = document.getElementById("profileNameDisplay");
+  const subline = document.getElementById("profileSubline");
+  const roleTag = document.getElementById("profileRoleTag");
+  const idDisplay = document.getElementById("profileId");
+  const bloodDisplay = document.getElementById("profileBloodDisplay");
+  const cityDisplay = document.getElementById("profileCityDisplay");
+  const phoneDisplay = document.getElementById("profilePhoneDisplay");
+  const updatedMeta = document.getElementById("profileUpdatedMeta");
+  const donorStatusPill = document.getElementById("donorStatusPill");
+
+  // External summaries (localStorage only)
+  const remindersSummary = document.getElementById("profileRemindersSummary");
+  const vitalsSummary = document.getElementById("profileVitalsSummary");
+  const bloodSearchSummary = document.getElementById("profileBloodSearchSummary");
+  const organSearchSummary = document.getElementById("profileOrganSearchSummary");
+  const rareSummary = document.getElementById("profileRareSummary");
+
+  /* ---------------------------------------------------------
+     UTILITIES
+  ------------------------------------------------------------*/
+
+  function computeAgeFromDob(dobStr) {
+    if (!dobStr) return null;
+    const d = new Date(dobStr);
+    if (isNaN(d)) return null;
+
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const m = today.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+    return age;
+  }
+
+  function formatDateTime(ts) {
+    if (!ts) return "Not saved yet";
+    const d = new Date(ts);
+    return isNaN(d) ? "Not saved yet" : "Last updated: " + d.toLocaleString();
+  }
+
+  function updateEmergencyStatus() {
+    const has =
+      emgName.value.trim() ||
+      emgPhone.value.trim() ||
+      emgRelation.value.trim();
+
+    if (!has) {
+      emgStatus.textContent = "⚠ No emergency contact saved";
+      emgStatus.style.background = "rgba(244,67,54,0.08)";
+      emgStatus.style.color = "#b01911";
+    } else {
+      emgStatus.textContent =
+        "✅ Emergency contact: " +
+        (emgName.value || "Saved contact") +
+        (emgRelation.value ? " (" + emgRelation.value + ")" : "");
+      emgStatus.style.background = "rgba(0,200,83,0.08)";
+      emgStatus.style.color = "#0f7a3b";
+    }
+  }
+
+  function updateDonorStatus() {
+    const blood = prefBloodDonor.checked;
+    const organ = prefOrganDonor.checked;
+
+    if (!blood && !organ) {
+      donorStatusPill.textContent =
+        "Donor status: Not registered as blood or organ donor";
+      donorStatusPill.style.background = "rgba(96,125,139,0.08)";
+      donorStatusPill.style.color = "#37474f";
+      donorStatusPill.style.borderColor = "rgba(96,125,139,0.4)";
+      return;
+    }
+
+    let txt = "Donor status: ";
+    if (blood && organ) txt += "Blood + organ donor (willing)";
+    else if (blood) txt += "Blood donor (willing)";
+    else txt += "Organ donor (willing)";
+
+    donorStatusPill.textContent = "✅ " + txt;
+    donorStatusPill.style.background = "rgba(0,200,83,0.08)";
+    donorStatusPill.style.color = "#0f7a3b";
+    donorStatusPill.style.borderColor = "rgba(0,200,83,0.4)";
+  }
+
+  function updateExternalSummaries() {
+    function ls(key, fallback) {
+      try {
+        return JSON.parse(localStorage.getItem(key)) || fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    // Reminders
+    const reminders = ls("lifelink_reminders_v1", []);
+    remindersSummary.textContent =
+      reminders.length ? `AI reminders: ${reminders.length}` : "AI reminders: none";
+
+    // Vitals
+    const vitals = ls("lifelink_vitals_v1", []);
+    if (vitals.length) {
+      const last = vitals[0];
+      const ts = last.createdAt ? new Date(last.createdAt).toLocaleString() : "recently";
+      const gl = last.glucose ? last.glucose + " mg/dL" : "no sugar value";
+      vitalsSummary.textContent = `Vitals: last log ${ts} (${gl})`;
+    } else {
+      vitalsSummary.textContent = "Vitals: no logs yet";
+    }
+
+    // Blood DB
+    const b = ls("lifelink_last_blood_search", null);
+    bloodSearchSummary.textContent = b
+      ? `Blood DB: ${b.bloodGroup || "any"} · ${b.city || ""} (${new Date(
+          b.timestamp
+        ).toLocaleString()})`
+      : "Blood DB: no search saved";
+
+    // Organ DB
+    const o = ls("lifelink_last_organ_search", null);
+    organSearchSummary.textContent = o
+      ? `Organ DB: ${o.organ || "any"} · ${o.bloodGroup || "any"} · ${o.city ||
+          ""} (${new Date(o.timestamp).toLocaleString()})`
+      : "Organ DB: no search saved";
+
+    // Rare Med
+    const r = ls("lifelink_last_rare_search", null);
+    rareSummary.textContent = r
+      ? `Rare Med: ${r.medicine || "any"} · ${r.city || ""} (${new Date(
+          r.timestamp
+        ).toLocaleString()})`
+      : "Rare Med: no search saved";
+  }
+
+  function updateDisplayFromForm(lastUpdatedTs) {
+    const nameVal = fullName.value.trim() || "User Name";
+    nameDisplay.textContent = nameVal;
+    avatar.textContent = nameVal.charAt(0).toUpperCase();
+
+    const age = computeAgeFromDob(dob.value);
+    const ageText = age ? age + " yrs" : "Age not set";
+    const bg = bloodGroup.value || "Blood group not set";
+    subline.textContent = `${ageText} · ${bg}`;
+
+    roleTag.textContent = userRole.value || "Registered User";
+    bloodDisplay.textContent = bloodGroup.value || "—";
+    cityDisplay.textContent = city.value || "—";
+    phoneDisplay.textContent = phone.value || "—";
+
+    updatedMeta.textContent = formatDateTime(lastUpdatedTs);
+
+    updateEmergencyStatus();
+    updateDonorStatus();
+    updateExternalSummaries();
+  }
+
+  /* ---------------------------------------------------------
+     INIT: Load from Firebase
+  ------------------------------------------------------------*/
+  async function initProfile() {
+    const existing = await loadProfileFromFirebase();
+
+    if (!existing) {
+      const randomId = "LL-" + String(Math.floor(Math.random() * 9000) + 1000);
+      idDisplay.textContent = randomId;
+      updatedMeta.textContent = "Not saved yet";
+      updateDisplayFromForm(null);
+      return;
+    }
+
+    // Populate form
+    fullName.value = existing.fullName || "";
+    email.value = existing.email || "";
+    phone.value = existing.phone || "";
+    city.value = existing.city || "";
+    dob.value = existing.dob || "";
+    gender.value = existing.gender || "";
+    bloodGroup.value = existing.bloodGroup || "";
+    userRole.value = existing.userRole || "General User";
+    allergies.value = existing.allergies || "";
+    conditions.value = existing.conditions || "";
+    medications.value = existing.medications || "";
+    preferredHospital.value = existing.preferredHospital || "";
+    healthId.value = existing.healthId || "";
+    insuranceProvider.value = existing.insuranceProvider || "";
+    languagePref.value = existing.languagePref || "English";
+
+    emgName.value = existing.emgName || "";
+    emgPhone.value = existing.emgPhone || "";
+    emgRelation.value = existing.emgRelation || "";
+
+    prefBloodDonor.checked = !!existing.prefBloodDonor;
+    prefOrganDonor.checked = !!existing.prefOrganDonor;
+    prefShareData.checked = !!existing.prefShareData;
+    prefEmailNotify.checked = !!existing.prefEmailNotify;
+    prefSmsNotify.checked = !!existing.prefSmsNotify;
+    prefCriticalAlerts.checked = !!existing.prefCriticalAlerts;
+
+    idDisplay.textContent = existing.profileId || "LL-0001";
+
+    updateDisplayFromForm(existing.updatedAt);
+  }
+
+  /* ---------------------------------------------------------
+     SAVE TO FIREBASE
+  ------------------------------------------------------------*/
+  profileForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const profileId =
+      idDisplay.textContent.startsWith("LL-")
+        ? idDisplay.textContent
+        : "LL-" + String(Math.floor(Math.random() * 9000) + 1000);
+
+    const nowIso = new Date().toISOString();
+
+    const data = {
+      profileId,
+      fullName: fullName.value,
+      email: email.value,
+      phone: phone.value,
+      city: city.value,
+      dob: dob.value,
+      gender: gender.value,
+      bloodGroup: bloodGroup.value,
+      userRole: userRole.value,
+      allergies: allergies.value,
+      conditions: conditions.value,
+      medications: medications.value,
+      preferredHospital: preferredHospital.value,
+      healthId: healthId.value,
+      insuranceProvider: insuranceProvider.value,
+      languagePref: languagePref.value,
+      emgName: emgName.value,
+      emgPhone: emgPhone.value,
+      emgRelation: emgRelation.value,
+      prefBloodDonor: prefBloodDonor.checked,
+      prefOrganDonor: prefOrganDonor.checked,
+      prefShareData: prefShareData.checked,
+      prefEmailNotify: prefEmailNotify.checked,
+      prefSmsNotify: prefSmsNotify.checked,
+      prefCriticalAlerts: prefCriticalAlerts.checked,
+      updatedAt: nowIso,
+    };
+
+    saveProfileToFirebase(data).then((r) => {
+      if (r.status === "success") {
+        idDisplay.textContent = profileId;
+        updateDisplayFromForm(nowIso);
+        alert("Profile saved to cloud.");
+      } else {
+        alert("Error saving profile. Check console.");
+        console.error("Save error:", r);
+      }
+    });
+  });
+
+  /* ---------------------------------------------------------
+     RESET BUTTON (local only)
+  ------------------------------------------------------------*/
+  resetProfileBtn.addEventListener("click", function () {
+    if (!confirm("Reset form (cloud data stays)?")) return;
+
+    profileForm.reset();
+    emgName.value = "";
+    emgPhone.value = "";
+    emgRelation.value = "";
+
+    updateDisplayFromForm(null);
+  });
+
+  /* ---------------------------------------------------------
+     PDF EXPORT
+  ------------------------------------------------------------*/
+  if (downloadPdfBtn) {
+    downloadPdfBtn.addEventListener("click", function () {
+      window.print();
+    });
+  }
+
+  /* ---------------------------------------------------------
+     CLEAR APP DATA (localStorage only)
+  ------------------------------------------------------------*/
+  if (clearAppDataBtn) {
+    clearAppDataBtn.addEventListener("click", function () {
+      if (!confirm("Clear all LifeLink local data? Cloud data remains.")) return;
+
+      const keys = [
+        "lifelink_reminders_v1",
+        "lifelink_vitals_v1",
+        "lifelink_last_blood_search",
+        "lifelink_last_organ_search",
+        "lifelink_last_rare_search",
+      ];
+
+      keys.forEach((k) => localStorage.removeItem(k));
+
+      alert("Local data cleared.");
+      location.reload();
+    });
+  }
+
+  /* ---------------------------------------------------------
+     LIVE UI UPDATES
+  ------------------------------------------------------------*/
+  [
+    fullName,
+    dob,
+    bloodGroup,
+    userRole,
+    city,
+    phone,
+    emgName,
+    emgPhone,
+    emgRelation,
+    prefBloodDonor,
+    prefOrganDonor,
+  ].forEach((el) => {
+    el.addEventListener("input", () => updateDisplayFromForm(null));
+    el.addEventListener("change", () => updateDisplayFromForm(null));
+  });
+
+  /* ---------------------------------------------------------
+     INIT PAGE
+  ------------------------------------------------------------*/
+  initProfile();
+});
+</script>
+
+</body>
+</html>

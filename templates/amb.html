@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ambulance & Emergency | LifeLink</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+   <link rel="stylesheet" href="{{ url_for('static', filename='h_global2.css') }}">
+
+  <style>
+    /* ---------- PAGE-SPECIFIC STYLES: AMBULANCE ---------- */
+
+    .ambulance-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    @media (min-width: 1024px) {
+      .ambulance-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+        gap: 1.4rem;
+        align-items: flex-start;
+      }
+    }
+
+    .ambulance-card {
+      padding: 1.8rem 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      .ambulance-card {
+        padding: 2rem 1.7rem;
+      }
+    }
+
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
+      align-items: baseline;
+      margin-bottom: 0.6rem;
+    }
+
+    .card-title-row h3 {
+      font-size: 1.05rem;
+      margin: 0;
+    }
+
+    .card-title-row span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .subtext {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      margin-bottom: 0.9rem;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    @media (min-width: 640px) {
+      .form-grid.two-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      border-radius: 12px;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.86rem;
+      border: 1px solid var(--glass-border);
+      background: #ffffff;
+      outline: none;
+    }
+
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-soft);
+    }
+
+    .form-row-actions {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.6rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.15rem 0.6rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid rgba(167, 224, 255, 0.65);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--text-muted);
+    }
+
+    .pill-badge.success {
+      background: rgba(0, 200, 83, 0.08);
+      border-color: rgba(0, 200, 83, 0.5);
+      color: #0f7a3b;
+    }
+
+    .pill-badge.warn {
+      background: rgba(255, 193, 7, 0.12);
+      border-color: rgba(255, 193, 7, 0.5);
+      color: #8a5a00;
+    }
+
+    .pill-badge.info {
+      background: rgba(33, 150, 243, 0.08);
+      border-color: rgba(33, 150, 243, 0.4);
+      color: #0b5fad;
+    }
+
+    .small-toggle-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      align-items: center;
+    }
+
+    .small-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .small-toggle input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Ambulance table */
+
+    .table-wrapper {
+      margin-top: 0.9rem;
+      border-radius: 12px;
+      overflow: auto;
+      max-height: 420px;
+      border: 1px solid rgba(167, 221, 255, 0.35);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+    }
+
+    table.ambulance-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      min-width: 720px;
+    }
+
+    .ambulance-table thead {
+      position: sticky;
+      top: 0;
+      background: #fff6fb;
+      z-index: 1;
+    }
+
+    .ambulance-table th,
+    .ambulance-table td {
+      padding: 0.55rem 0.6rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(167, 207, 255, 0.4);
+    }
+
+    .ambulance-table th {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .ambulance-table tbody tr:hover {
+      background: rgba(255, 248, 252, 0.95);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.12rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background: rgba(0, 200, 83, 0.1);
+      color: #0f7a3b;
+      border: 1px solid rgba(0, 200, 83, 0.4);
+    }
+
+    .status-inactive {
+      background: rgba(96, 125, 139, 0.12);
+      color: #37474f;
+      border: 1px solid rgba(96, 125, 139, 0.5);
+    }
+
+    .btn-xs {
+      padding: 0.35rem 0.7rem;
+      font-size: 0.76rem;
+    }
+
+    /* Map card */
+    .hospital-map-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .hospital-map-frame {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--glass-border);
+      height: 260px;
+    }
+
+    .hospital-map-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    @media (min-width: 1024px) {
+      .hospital-map-frame {
+        height: 320px;
+      }
+    }
+
+    main {
+      padding-bottom: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background animation -->
+  <div class="background-pulse">
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+    <div class="pulse-circle"></div>
+  </div>
+
+  <!-- Sidebar backdrop -->
+  <div class="sidebar-backdrop"></div>
+
+  <div class="layout page-root">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass">
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">LIFELINK</div>
+      </div>
+
+      <nav class="sidebar-links">
+         <a href="{{ url_for('h_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('hblood') }}"  >Blood database</a>
+        <a href = "{{url_for('horgan')}}">Organ Database</a>
+        <a href="{{ url_for('drugi') }}">Drug-inventory</a>
+        <a href="{{ url_for('happointment') }}"  >Appointemts database</a>
+        <a href="{{ url_for('nurse') }}">Nurse Schedular</a>
+        <a href="{{ url_for('ambulance') }}" class="active">Ambulance</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        User Panel · LifeLink
+      </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="layout-main">
+      <!-- NAVBAR -->
+      <header class="navbar glass">
+        <div class="navbar-left">
+          <div class="logo-dot"></div>
+          <span class="logo-text">LIFELINK</span>
+        </div>
+
+        <nav class="navbar-links">
+           <a href="{{ url_for('h_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('hblood') }}"  >Blood database</a>
+        <a href = "{{url_for('horgan')}}">Organ Database</a>
+        <a href="{{ url_for('drugi') }}">Drug-inventory</a>
+        <a href="{{ url_for('happointment') }}"  >Appointemts database</a>
+        <a href="{{ url_for('nurse') }}">Nurse Schedular</a>
+        <a href="{{ url_for('ambulance') }}" class="active">Ambulance</a>
+        </nav>
+
+        <button type="button" class="sidebar-toggle" aria-label="Toggle sidebar">
+          <span class="bar"></span>
+          <span class="label"></span>
+        </button>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main>
+        <section class="section">
+          <div class="section-header">
+            <h2>Ambulance Control</h2>
+            <p>
+              Manage <strong>hospital profile</strong>, <strong>ambulances &amp; drivers</strong>,
+              and <strong>emergency alert settings</strong> in one place.
+            </p>
+          </div>
+
+          <div class="ambulance-grid">
+            <!-- LEFT COLUMN: Hospital + Ambulances -->
+            <div class="left-column">
+              <!-- Hospital Profile -->
+              <div class="glass info-card tilt-card ambulance-card">
+                <div class="card-title-row">
+                  <h3>Hospital Profile</h3>
+                  <span id="hospitalProfileStatus">Not saved</span>
+                </div>
+                <p class="subtext">
+                  This information is used in all <strong>ambulance alerts</strong> and
+                  emergency messages sent to users or other hospitals.
+                </p>
+
+                <form id="hospitalForm">
+                  <div class="form-grid two-col">
+                    <div class="form-group">
+                      <label for="hospitalId">Hospital ID</label>
+                      <input id="hospitalId" type="text" placeholder="HSP-001" />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="hospitalName">Hospital name</label>
+                      <input id="hospitalName" type="text" placeholder="City Emergency Hospital" />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="emergencyPhone">Emergency phone</label>
+                      <input id="emergencyPhone" type="tel" placeholder="+91-XXXXXXXXXX" />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="hospitalEmail">Email (optional)</label>
+                      <input id="hospitalEmail" type="email" placeholder="er@hospital.org" />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="addressLine">Address line</label>
+                      <input id="addressLine" type="text" placeholder="123, Main Road, Near Metro" />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="city">City</label>
+                      <input id="city" type="text" placeholder="Bengaluru" />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="pincode">Pincode</label>
+                      <input id="pincode" type="text" placeholder="5600xx" />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="gpsLocation">GPS (optional)</label>
+                      <input id="gpsLocation" type="text" placeholder="12.97, 77.59 or Google Maps link" />
+                    </div>
+                  </div>
+
+                  <div class="form-row-actions">
+                    <button type="button" class="btn ghost" id="hospitalResetBtn">Reset</button>
+                    <button type="submit" class="btn primary">Save Hospital Profile</button>
+                  </div>
+                </form>
+
+                <div style="margin-top:0.8rem; font-size:0.78rem; color:var(--text-muted);">
+                  <span class="pill-badge info" id="hospitalSummaryBadge">
+                    No hospital profile saved yet
+                  </span>
+                </div>
+              </div>
+
+              <!-- Ambulance & Driver Management -->
+              <div class="glass info-card tilt-card ambulance-card">
+                <div class="card-title-row">
+                  <h3>Ambulance &amp; Driver Management</h3>
+                  <span id="ambulanceCountLabel">0 ambulances</span>
+                </div>
+                <p class="subtext">
+                  Add, update and track <strong>ambulances, drivers &amp; active status</strong>.
+                  This list is used in <strong>dispatch logic</strong>.
+                </p>
+
+                <form id="ambulanceForm">
+                  <div class="form-grid two-col">
+                    <div class="form-group">
+                      <label for="ambulanceId">Ambulance ID</label>
+                      <input id="ambulanceId" type="text" placeholder="AMB-001" />
+                    </div>
+                    <div class="form-group">
+                      <label for="vehicleNumber">Vehicle number</label>
+                      <input id="vehicleNumber" type="text" placeholder="KA 01 AB 1234" />
+                    </div>
+                    <div class="form-group">
+                      <label for="driverId">Driver ID</label>
+                      <input id="driverId" type="text" placeholder="DRV-001" />
+                    </div>
+                    <div class="form-group">
+                      <label for="driverName">Driver name</label>
+                      <input id="driverName" type="text" placeholder="Ravi Kumar" />
+                    </div>
+                    <div class="form-group">
+                      <label for="driverPhone">Driver phone</label>
+                      <input id="driverPhone" type="tel" placeholder="+91-9XXXXXXXXX" />
+                    </div>
+                    <div class="form-group">
+                      <label>Active status</label>
+                      <div class="small-toggle-row">
+                        <label class="small-toggle">
+                          <input type="checkbox" id="ambulanceIsActive" />
+                          <span>Is active & available for dispatch</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-row-actions">
+                    <button type="button" class="btn ghost" id="ambulanceCancelEditBtn" style="display:none;">
+                      Cancel edit
+                    </button>
+                    <button type="button" class="btn ghost" id="ambulanceResetBtn">
+                      Clear form
+                    </button>
+                    <button type="submit" class="btn primary" id="ambulanceSubmitBtn">
+                      Add Ambulance
+                    </button>
+                  </div>
+                </form>
+
+                <div class="table-wrapper">
+                  <table class="ambulance-table">
+                    <thead>
+                      <tr>
+                        <th>Ambulance</th>
+                        <th>Vehicle</th>
+                        <th>Driver</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ambulanceTableBody">
+                      <!-- Rows via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Emergency Handling Settings + Map -->
+            <div class="right-column">
+              <!-- Emergency Settings -->
+              <div class="glass info-card tilt-card ambulance-card">
+                <div class="card-title-row">
+                  <h3>Emergency Handling Settings</h3>
+                  <span id="settingsStatusLabel">Not configured</span>
+                </div>
+                <p class="subtext">
+                  Control how <strong>ambulance alerts</strong> are triggered:
+                  service radius, alert message template and notification channels.
+                </p>
+
+                <form id="settingsForm">
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label for="serviceRadius">Service radius (km)</label>
+                      <input
+                        id="serviceRadius"
+                        type="number"
+                        min="1"
+                        step="1"
+                        placeholder="e.g. 15"
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="alertTemplate">Alert template</label>
+                      <textarea
+                        id="alertTemplate"
+                        placeholder="e.g. EMERGENCY: Ambulance requested for {{PATIENT_NAME}} at {{LOCATION}}. Hospital: {{HOSPITAL_NAME}}, Phone: {{EMERGENCY_PHONE}}."
+                      ></textarea>
+                      <small style="font-size:0.74rem; color:var(--text-muted);">
+                        Use placeholders like <code>{{HOSPITAL_NAME}}</code>, <code>{{EMERGENCY_PHONE}}</code>,
+                        <code>{{LOCATION}}</code>, <code>{{PATIENT_NAME}}</code>.
+                      </small>
+                    </div>
+
+                    <div class="form-group">
+                      <label>Notification preferences (optional)</label>
+                      <div class="small-toggle-row">
+                        <label class="small-toggle">
+                          <input type="checkbox" id="notifySms" />
+                          <span>SMS / WhatsApp alerts</span>
+                        </label>
+                        <label class="small-toggle">
+                          <input type="checkbox" id="notifyEmail" />
+                          <span>Email alerts</span>
+                        </label>
+                        <label class="small-toggle">
+                          <input type="checkbox" id="notifyDashboard" />
+                          <span>Dashboard popup alerts</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-row-actions">
+                    <button type="button" class="btn ghost" id="settingsResetBtn">
+                      Reset settings
+                    </button>
+                    <button type="submit" class="btn primary">
+                      Save settings
+                    </button>
+                  </div>
+                </form>
+
+                <div style="margin-top:0.8rem; font-size:0.78rem; color:var(--text-muted);">
+                  <span class="pill-badge" id="settingsSummaryBadge">
+                    No emergency settings saved yet
+                  </span>
+                </div>
+              </div>
+
+              <!-- Hospital Map -->
+              <div class="glass info-card tilt-card ambulance-card hospital-map-card">
+                <div class="card-title-row">
+                  <h3>Hospital Map</h3>
+                  <span id="hospitalMapStatus">Using default location</span>
+                </div>
+                <p id="hospitalMapDescription">
+                  Map centers on your hospital once you save the hospital profile. If GPS is provided,
+                  it is used directly; otherwise, address & city are used.
+                </p>
+
+                <div class="hospital-map-frame">
+                  <iframe
+                    id="hospitalMapFrame"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    src="https://www.google.com/maps?q=hospital+near+me&output=embed"
+                  ></iframe>
+                </div>
+
+                <div class="form-row-actions" style="margin-top:0.7rem; justify-content:flex-start;">
+                  <button type="button" class="btn ghost btn-xs" id="recenterMapBtn">
+                    Recenter map to hospital
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          © 2025 LifeLink · Ambulance & Emergency
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- Emergency Button -->
+
+
+  <!-- Emergency Toast -->
+  <div id="emergencyToast" class="emergency-toast">
+    <div class="glass toast-content">
+      <h3>Emergency Mode Activated</h3>
+      <p>
+        Configure this to trigger calls, SMS or alerts to your emergency response team
+        and nearby hospitals.
+      </p>
+      <button id="closeToast" class="btn ghost">Close</button>
+    </div>
+  </div>
+
+  <!-- Global JS (sidebar, emergency, etc.) -->
+  <script src="{{ url_for('static', filename='h_global.js') }}"></script>
+
+  <!-- Page-specific JS -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      /* ---------- KEYS ---------- */
+      const HOSPITAL_KEY = "lifelink_ambulance_hospital_v1";
+      const AMBULANCE_KEY = "lifelink_ambulance_list_v1";
+      const SETTINGS_KEY = "lifelink_ambulance_settings_v1";
+
+      /* ---------- HOSPITAL FORM ---------- */
+      const hospitalForm = document.getElementById("hospitalForm");
+      const hospitalResetBtn = document.getElementById("hospitalResetBtn");
+      const hospitalProfileStatus = document.getElementById("hospitalProfileStatus");
+      const hospitalSummaryBadge = document.getElementById("hospitalSummaryBadge");
+
+      const hospitalId = document.getElementById("hospitalId");
+      const hospitalName = document.getElementById("hospitalName");
+      const emergencyPhone = document.getElementById("emergencyPhone");
+      const hospitalEmail = document.getElementById("hospitalEmail");
+      const addressLine = document.getElementById("addressLine");
+      const cityInput = document.getElementById("city");
+      const pincode = document.getElementById("pincode");
+      const gpsLocation = document.getElementById("gpsLocation");
+
+      /* Map elements */
+      const hospitalMapFrame = document.getElementById("hospitalMapFrame");
+      const hospitalMapDescription = document.getElementById("hospitalMapDescription");
+      const hospitalMapStatus = document.getElementById("hospitalMapStatus");
+      const recenterMapBtn = document.getElementById("recenterMapBtn");
+
+      function encodeMapQuery(q) {
+        return encodeURIComponent(q || "");
+      }
+
+      function updateHospitalMapFromData(data) {
+        if (!data) {
+          hospitalMapFrame.src =
+            "https://www.google.com/maps?q=hospital+near+me&output=embed";
+          hospitalMapStatus.textContent = "Using default location";
+          hospitalMapDescription.textContent =
+            "No hospital profile saved yet. Showing hospitals near your generic location.";
+          return;
+        }
+
+        let query = "";
+        if (data.gpsLocation) {
+          // If GPS coordinates or a direct maps search string is provided, use that
+          query = data.gpsLocation;
+        } else {
+          const parts = [];
+          if (data.hospitalName) parts.push(data.hospitalName);
+          if (data.addressLine) parts.push(data.addressLine);
+          if (data.city) parts.push(data.city);
+          if (data.pincode) parts.push(data.pincode);
+          query = parts.join(", ");
+        }
+
+        if (!query.trim()) {
+          hospitalMapFrame.src =
+            "https://www.google.com/maps?q=hospital+near+me&output=embed";
+          hospitalMapStatus.textContent = "Using default location";
+          hospitalMapDescription.textContent =
+            "Hospital profile has empty address. Showing hospitals near your generic location.";
+          return;
+        }
+
+        const encoded = encodeMapQuery(query);
+        hospitalMapFrame.src =
+          "https://www.google.com/maps?q=" + encoded + "&output=embed";
+
+        hospitalMapStatus.textContent = "Map centered on hospital";
+        hospitalMapDescription.textContent =
+          "Map centered on: " +
+          (data.hospitalName || "Configured hospital") +
+          " (" +
+          query +
+          ")";
+      }
+
+      function loadHospital() {
+        try {
+          const raw = localStorage.getItem(HOSPITAL_KEY);
+          if (!raw) {
+            hospitalProfileStatus.textContent = "Not saved";
+            hospitalSummaryBadge.textContent = "No hospital profile saved yet";
+            hospitalSummaryBadge.classList.remove("success");
+            updateHospitalMapFromData(null);
+            return;
+          }
+          const data = JSON.parse(raw) || {};
+
+          hospitalId.value = data.hospitalId || "";
+          hospitalName.value = data.hospitalName || "";
+          emergencyPhone.value = data.emergencyPhone || "";
+          hospitalEmail.value = data.hospitalEmail || "";
+          addressLine.value = data.addressLine || "";
+          cityInput.value = data.city || "";
+          pincode.value = data.pincode || "";
+          gpsLocation.value = data.gpsLocation || "";
+
+          hospitalProfileStatus.textContent = "Profile saved";
+          hospitalSummaryBadge.textContent =
+            (data.hospitalName || "Hospital") +
+            " · " +
+            (data.city || "City not set");
+          hospitalSummaryBadge.classList.add("success");
+          hospitalSummaryBadge.classList.remove("warn");
+
+          updateHospitalMapFromData(data);
+        } catch (e) {
+          console.warn("Error loading hospital profile", e);
+          updateHospitalMapFromData(null);
+        }
+      }
+
+      function saveHospital() {
+        const payload = {
+          hospitalId: hospitalId.value.trim(),
+          hospitalName: hospitalName.value.trim(),
+          emergencyPhone: emergencyPhone.value.trim(),
+          hospitalEmail: hospitalEmail.value.trim(),
+          addressLine: addressLine.value.trim(),
+          city: cityInput.value.trim(),
+          pincode: pincode.value.trim(),
+          gpsLocation: gpsLocation.value.trim(),
+          updatedAt: new Date().toISOString(),
+        };
+        try {
+          localStorage.setItem(HOSPITAL_KEY, JSON.stringify(payload));
+        } catch (e) {
+          console.warn("Error saving hospital profile", e);
+        }
+        return payload;
+      }
+
+      hospitalForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const data = saveHospital();
+        loadHospital();
+        alert("Hospital profile saved.");
+        updateHospitalMapFromData(data);
+      });
+
+      hospitalResetBtn.addEventListener("click", function () {
+        if (!confirm("Clear hospital profile from this browser?")) return;
+        localStorage.removeItem(HOSPITAL_KEY);
+        hospitalForm.reset();
+        loadHospital();
+      });
+
+      if (recenterMapBtn) {
+        recenterMapBtn.addEventListener("click", function () {
+          try {
+            const raw = localStorage.getItem(HOSPITAL_KEY);
+            const data = raw ? JSON.parse(raw) : null;
+            updateHospitalMapFromData(data);
+          } catch (e) {
+            console.warn("Error recentering map", e);
+            updateHospitalMapFromData(null);
+          }
+        });
+      }
+
+      /* ---------- AMBULANCE MANAGEMENT ---------- */
+      const ambulanceForm = document.getElementById("ambulanceForm");
+      const ambulanceSubmitBtn = document.getElementById("ambulanceSubmitBtn");
+      const ambulanceCancelEditBtn = document.getElementById("ambulanceCancelEditBtn");
+      const ambulanceResetBtn = document.getElementById("ambulanceResetBtn");
+      const ambulanceTableBody = document.getElementById("ambulanceTableBody");
+      const ambulanceCountLabel = document.getElementById("ambulanceCountLabel");
+
+      const ambulanceId = document.getElementById("ambulanceId");
+      const vehicleNumber = document.getElementById("vehicleNumber");
+      const driverId = document.getElementById("driverId");
+      const driverName = document.getElementById("driverName");
+      const driverPhone = document.getElementById("driverPhone");
+      const ambulanceIsActive = document.getElementById("ambulanceIsActive");
+
+      let ambulances = [];
+      let editingIndex = null;
+
+      function loadAmbulances() {
+        try {
+          const raw = localStorage.getItem(AMBULANCE_KEY);
+          ambulances = raw ? JSON.parse(raw) || [] : [];
+        } catch (e) {
+          console.warn("Error loading ambulances", e);
+          ambulances = [];
+        }
+        renderAmbulanceTable();
+      }
+
+      function saveAmbulances() {
+        try {
+          localStorage.setItem(AMBULANCE_KEY, JSON.stringify(ambulances));
+        } catch (e) {
+          console.warn("Error saving ambulances", e);
+        }
+      }
+
+      function renderAmbulanceTable() {
+        ambulanceTableBody.innerHTML = "";
+
+        if (!ambulances.length) {
+          ambulanceTableBody.innerHTML =
+            '<tr><td colspan="6">No ambulances added yet.</td></tr>';
+          ambulanceCountLabel.textContent = "0 ambulances";
+          return;
+        }
+
+        ambulances.forEach((amb, index) => {
+          const tr = document.createElement("tr");
+
+          const statusClass = amb.isActive ? "status-active" : "status-inactive";
+          const statusText = amb.isActive ? "Active" : "Inactive";
+
+          tr.innerHTML =
+            "<td>" +
+            (amb.ambulanceId || "—") +
+            "</td>" +
+            "<td>" +
+            (amb.vehicleNumber || "—") +
+            "</td>" +
+            "<td>" +
+            (amb.driverName || "—") +
+            "<br/><small>" +
+            (amb.driverId || "") +
+            "</small></td>" +
+            "<td>" +
+            (amb.driverPhone || "—") +
+            "</td>" +
+            '<td><span class="status-badge ' +
+            statusClass +
+            '">' +
+            statusText +
+            "</span></td>" +
+            '<td>' +
+            '<button type="button" class="btn ghost btn-xs amb-edit" data-index="' +
+            index +
+            '">Edit</button> ' +
+            '<button type="button" class="btn ghost btn-xs amb-delete" data-index="' +
+            index +
+            '">Delete</button>' +
+            "</td>";
+
+          ambulanceTableBody.appendChild(tr);
+        });
+
+        ambulanceCountLabel.textContent =
+          ambulances.length +
+          " ambulance" +
+          (ambulances.length > 1 ? "s" : "");
+      }
+
+      function resetAmbulanceForm() {
+        ambulanceForm.reset();
+        ambulanceIsActive.checked = false;
+      }
+
+      function startEditAmbulance(idx) {
+        const amb = ambulances[idx];
+        if (!amb) return;
+
+        editingIndex = idx;
+        ambulanceId.value = amb.ambulanceId || "";
+        vehicleNumber.value = amb.vehicleNumber || "";
+        driverId.value = amb.driverId || "";
+        driverName.value = amb.driverName || "";
+        driverPhone.value = amb.driverPhone || "";
+        ambulanceIsActive.checked = !!amb.isActive;
+
+        ambulanceSubmitBtn.textContent = "Update Ambulance";
+        ambulanceCancelEditBtn.style.display = "inline-flex";
+      }
+
+      function stopEditAmbulance() {
+        editingIndex = null;
+        ambulanceSubmitBtn.textContent = "Add Ambulance";
+        ambulanceCancelEditBtn.style.display = "none";
+        resetAmbulanceForm();
+      }
+
+      ambulanceForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const payload = {
+          ambulanceId: ambulanceId.value.trim(),
+          vehicleNumber: vehicleNumber.value.trim(),
+          driverId: driverId.value.trim(),
+          driverName: driverName.value.trim(),
+          driverPhone: driverPhone.value.trim(),
+          isActive: ambulanceIsActive.checked,
+          updatedAt: new Date().toISOString(),
+        };
+
+        if (!payload.ambulanceId || !payload.vehicleNumber) {
+          alert("Please fill at least Ambulance ID and Vehicle number.");
+          return;
+        }
+
+        if (editingIndex === null) {
+          ambulances.push(payload);
+        } else {
+          ambulances[editingIndex] = payload;
+        }
+
+        saveAmbulances();
+        renderAmbulanceTable();
+        stopEditAmbulance();
+      });
+
+      ambulanceCancelEditBtn.addEventListener("click", function () {
+        stopEditAmbulance();
+      });
+
+      ambulanceResetBtn.addEventListener("click", function () {
+        stopEditAmbulance();
+      });
+
+      ambulanceTableBody.addEventListener("click", function (e) {
+        const editBtn = e.target.closest(".amb-edit");
+        const delBtn = e.target.closest(".amb-delete");
+
+        if (editBtn) {
+          const idx = parseInt(editBtn.getAttribute("data-index"), 10);
+          if (!isNaN(idx)) startEditAmbulance(idx);
+        }
+
+        if (delBtn) {
+          const idx = parseInt(delBtn.getAttribute("data-index"), 10);
+          if (isNaN(idx)) return;
+          if (!confirm("Delete this ambulance entry?")) return;
+          ambulances.splice(idx, 1);
+          saveAmbulances();
+          renderAmbulanceTable();
+          if (editingIndex === idx) {
+            stopEditAmbulance();
+          }
+        }
+      });
+
+      /* ---------- SETTINGS ---------- */
+      const settingsForm = document.getElementById("settingsForm");
+      const settingsResetBtn = document.getElementById("settingsResetBtn");
+      const serviceRadius = document.getElementById("serviceRadius");
+      const alertTemplate = document.getElementById("alertTemplate");
+      const notifySms = document.getElementById("notifySms");
+      const notifyEmail = document.getElementById("notifyEmail");
+      const notifyDashboard = document.getElementById("notifyDashboard");
+      const settingsStatusLabel = document.getElementById("settingsStatusLabel");
+      const settingsSummaryBadge = document.getElementById("settingsSummaryBadge");
+
+      function loadSettings() {
+        try {
+          const raw = localStorage.getItem(SETTINGS_KEY);
+          if (!raw) {
+            settingsStatusLabel.textContent = "Not configured";
+            settingsSummaryBadge.textContent = "No emergency settings saved yet";
+            settingsSummaryBadge.classList.remove("success");
+            return;
+          }
+          const data = JSON.parse(raw) || {};
+          serviceRadius.value = data.serviceRadius || "";
+          alertTemplate.value = data.alertTemplate || "";
+          notifySms.checked = !!data.notifySms;
+          notifyEmail.checked = !!data.notifyEmail;
+          notifyDashboard.checked = !!data.notifyDashboard;
+
+          settingsStatusLabel.textContent = "Settings saved";
+          const radiusText = data.serviceRadius ? data.serviceRadius + " km" : "radius not set";
+          const channels = [];
+          if (data.notifySms) channels.push("SMS/WhatsApp");
+          if (data.notifyEmail) channels.push("Email");
+          if (data.notifyDashboard) channels.push("Dashboard");
+          const chText = channels.length ? channels.join(", ") : "no channels enabled";
+
+          settingsSummaryBadge.textContent = radiusText + " · " + chText;
+          settingsSummaryBadge.classList.add("success");
+        } catch (e) {
+          console.warn("Error loading settings", e);
+        }
+      }
+
+      function saveSettings() {
+        const payload = {
+          serviceRadius: serviceRadius.value ? parseInt(serviceRadius.value, 10) : null,
+          alertTemplate: alertTemplate.value.trim(),
+          notifySms: notifySms.checked,
+          notifyEmail: notifyEmail.checked,
+          notifyDashboard: notifyDashboard.checked,
+          updatedAt: new Date().toISOString(),
+        };
+        try {
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(payload));
+        } catch (e) {
+          console.warn("Error saving settings", e);
+        }
+      }
+
+      settingsForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        saveSettings();
+        loadSettings();
+        alert("Emergency settings saved.");
+      });
+
+      settingsResetBtn.addEventListener("click", function () {
+        if (!confirm("Reset emergency settings on this browser?")) return;
+        localStorage.removeItem(SETTINGS_KEY);
+        settingsForm.reset();
+        loadSettings();
+      });
+
+      /* ---------- INIT ---------- */
+      loadHospital();
+      loadAmbulances();
+      loadSettings();
+    });
+  </script>
+</body>
+</html>
