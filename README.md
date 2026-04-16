@@ -14,6 +14,7 @@ It provides **separate interfaces for Users and Hospitals**, enabling faster coo
 ---
 
 ## 📸 Screenshots
+![Banner](https://github.com/ABHI02G/Life_Link/blob/main/photos/about.jpeg?raw=true)
 
 ### 🧭 User Dashboard
 <img src="https://github.com/ABHI02G/Life_Link/blob/main/photos/Dashbord.jpeg?raw=true">
