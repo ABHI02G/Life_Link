@@ -16,21 +16,19 @@ It provides **separate interfaces for Users and Hospitals**, enabling faster coo
 ## 📸 Screenshots
 
 ### 🧭 User Dashboard
-
+<img src="https://github.com/ABHI02G/Life_Link/blob/main/photos/Dashbord.jpeg?raw=true">
 
 ### 🚨 Emergency SOS
-
+<img src="https://github.com/ABHI02G/Life_Link/blob/main/photos/amb.jpeg?raw=true">
 
 ### 🏥 Hospital Dashboard
-
+<img src="https://github.com/ABHI02G/Life_Link/blob/main/photos/Dashbord2.jpeg?raw=true">
 
 ### 🩸 Blood & 🫀 Organ Databases
-
+<img src="https://github.com/ABHI02G/Life_Link/blob/main/photos/Org.jpeg?raw=true">
 
 ### 🧠 AI Health Intelligence
-
-
-> 📂 Place all images inside a `/screenshots` folder.
+<img src="https://github.com/ABHI02G/Life_Link/blob/main/photos/t.jpeg?raw=true">
 
 ---
 
